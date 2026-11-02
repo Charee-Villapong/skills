@@ -1,0 +1,5 @@
+name: "cbt_thought_record"
+title: "認知行動療法の思考記録"
+description: "認知行動療法の思考記録を対話で進め、認知のゆがみを一緒にチェックしてバランスの取れた考えに書き換え、スプレッドシート「思考記録（CBT）」に蓄積・振り返りする。"
+category: "Health and fitness"
+include_in_prompt: true

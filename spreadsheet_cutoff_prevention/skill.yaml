@@ -1,0 +1,5 @@
+name: "spreadsheet_cutoff_prevention"
+title: "スプレッドシート見切れ防止"
+description: "Google Sheets（スマホ表示前提）で列幅・行高を文字量から決めて見切れを防ぐ。新規行追加時の書式・数式の付け忘れチェックと、変更後の読み戻し検証までを含む。"
+category: "Productivity"
+include_in_prompt: true

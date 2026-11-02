@@ -1,0 +1,23 @@
+name: spreadsheet_edit_verification
+title: Spreadsheet structural edit verification
+description: Verify a live spreadsheet after a structural change so summary formulas, data rows and charts survive row inserts, column hides and block moves.
+category: Work and knowledge
+include_in_prompt: false
+skill_improvement:
+  managed: true
+  status: active
+  evidence_handles:
+  - message:assistant-msg-4be3cf64-7304-4f10-b79c-6d047a32c5e3
+  - message:assistant-msg-1475020a-bcd2-405f-9e8a-af71eced599f
+  - message:assistant-msg-dc5eb5f6-c9b6-41ae-9247-54d96d6d544d
+  - message:assistant-msg-f05703b2-c5d6-4a26-a5fe-39670a200d7e
+  - message:9ad53e7-9996-4239-bc74-1e93065fe8e9
+  measurement:
+    proxy_metric_id: spreadsheet_structural_edit_regression_rate
+    success_criterion: In the 30 day window, no structural spreadsheet edit leaves a summary formula shifted, a data row overwritten or a chart invisible, and every such edit is rechecked before its report.
+    window_days: 30
+  needs_review: false
+  rationale: Three structural edit regressions hit the same mechanism on 2026-10-26. An insert nearly overwrote an existing row in message:assistant-msg-4be3cf64-7304-4f10-b79c-6d047a32c5e3. Repeated inserts shifted a daily summary formula range until it was fixed in message:assistant-msg-1475020a-bcd2-405f-9e8a-af71eced599f. Hiding a wide column range made a chart invisible in message:assistant-msg-dc5eb5f6-c9b6-41ae-9247-54d96d6d544d, and the layout was restored only after the user specified the visible columns in message:9ad53e7-9996-4239-bc74-1e93065fe8e9. Skill search found no skill covering pre-change mapping and post-change verification, and the system documents skill only states the general rule to preserve formulas without the map, insert, hide and recheck method. This skill adds exactly that method. Other candidates were rejected on restraint grounds. The single cigarette log inference was corrected in conversation and is already a stated boundary in memory and alignment. The mail rule about closing an unsubscribe as monthly cleanup alone is already covered by the managed browser_login_fallback skill inside its measurement window until 2026-11-24. The deterministic handoff suppression candidates are objective loop policy and trigger cadence, out of scope for a skill. Only two managed learned skills are active, so no consolidation is triggered.
+  review_after: 2026-11-25T14:46:27.902244+00:00
+  reviewed_at: 2026-10-26T14:46:27.902244+00:00
+  run_id: sirun_4d1587fedf004b6bbfc39ad20560823d

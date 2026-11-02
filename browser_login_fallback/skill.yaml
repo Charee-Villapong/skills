@@ -1,0 +1,25 @@
+name: browser_login_fallback
+title: Browser login fallback
+description: Finish a site setting task when the assistant browser login fails, by stopping repeated retries and using the user device fallback.
+category: Work and knowledge
+include_in_prompt: false
+skill_improvement:
+  managed: true
+  status: active
+  evidence_handles:
+  - message a384fd06
+  - message 1d628908
+  - message 4d358967
+  - runtime-child:2f2ef881-2d8c-564d-b987-aec401f4000f
+  - runtime-child:3ac7c182-d4d1-5107-89b0-b6c5faacc241
+  - runtime-child:09b9eb3b-0db0-5be1-93b1-9143198cacc3
+  - runtime-child:bed133bc-e2fb-5ecf-b2dc-c8f0590fafdc
+  measurement:
+    proxy_metric_id: browser_login_retry_loop_rate
+    success_criterion: In the 30 day window, no browser login task repeats the same failed login route more than once, every failed login task offers the user device fallback before closing, and no requested unsubscribe is closed as monthly cleanup alone.
+    window_days: 30
+  needs_review: false
+  rationale: 'The Offers unsubscribe task showed the loop this skill stops: the assistant announced a Google login card, the user could not find it, the assistant repeated re-issue promises, then prematurely switched to monthly cleanup in message a384fd06, the user corrected that in message 1d628908 to keep the unsubscribe request, and success came only in message 4d358967 through the user''s own phone browser. The same packet lists four login.advance tool failures and the alignment synthesis records bitFlyer login blocked by a bot check with user device login as the fallback, so the barrier pattern recurs across sites rather than being one site quirk. Skill search found no existing skill covering this fallback, and the Gmail and 1Password connector docs cover operations only, not the retry and fallback method. The Fantia count error is deliberately not re-proposed because the managed bulk_cleanup_count_reconciliation skill already covers it and remains inside its measurement window until 2026-11-23. The deterministic handoff suppression candidates are policy and trigger cadence, out of scope for a skill, and only one managed learned skill exists, so no consolidation is triggered.'
+  review_after: 2026-11-24T14:49:37.276404+00:00
+  reviewed_at: 2026-10-25T14:49:37.276404+00:00
+  run_id: sirun_5365d1e1d9cc41ee82a571c54bebbd79

@@ -1,0 +1,24 @@
+name: bulk_cleanup_count_reconciliation
+title: Bulk cleanup count reconciliation
+description: Reconcile bulk cleanup counts before reporting so a report shows only what this run newly changed, when you trash or archive many mail messages or Drive files at once.
+category: Work and knowledge
+include_in_prompt: false
+skill_improvement:
+  managed: true
+  status: active
+  evidence_handles:
+  - message 15406662
+  - message 1206cd1b
+  - message ed6b0923
+  - messages 7a208c23 to fc49fb41
+  - message a9cdb479
+  - message 803de2f0
+  measurement:
+    proxy_metric_id: bulk_cleanup_count_correction_rate
+    success_criterion: In the window every bulk cleanup report splits searched, already done, newly done, kept and restored numbers, the newly done number matches the executed log, and no bulk cleanup report needs a corrected total after publication.
+    window_days: 30
+  needs_review: false
+  rationale: The same counting failure recurred twice on 2026-10-24. A bulk mail report first gave total 2105 in message 15406662, then correction message 1206cd1b gave total 2912, then correction message ed6b0923 gave total 2928, with sender counts changing each time. The same pattern recurred for LinkedIn in messages 7a208c23 to fc49fb41, where 201 messages were counted but only 2 were newly trashed because 199 were already trashed in an earlier bulk run. Skill search found no existing skill covering already trashed reconciliation, and the system email-management skill covers counting with scope but not the searched versus already done versus newly done split. This new skill forces that split from the executed log before any report, which directly addresses both instances. Other candidates were single instances or already settled routines and were not proposed.
+  review_after: 2026-11-23T14:46:42.838175+00:00
+  reviewed_at: 2026-10-24T14:46:42.838175+00:00
+  run_id: sirun_965a566b71cd4bf09eb7f6d803cfc365
