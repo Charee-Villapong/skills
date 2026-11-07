@@ -1,3 +1,4 @@
+[English](README.en.md) | 日本語
 # stop-ai-slop-jp
 
 日本語の文章から、AI 特有の不自然な表現を取り除くためのチェック用スキルです（日本語版）。

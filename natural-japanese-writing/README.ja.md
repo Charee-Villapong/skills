@@ -1,6 +1,5 @@
 # natural-japanese-writing
 
-[English](README.md) | 日本語
 
 AIが書いたように読める日本語を、事実を変えずに自然な日本語へ直すスキル。Claude Code・Codex・Cursor で使える。
 
