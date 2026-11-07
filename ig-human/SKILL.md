@@ -20,9 +20,10 @@ python3 detect.py draft.txt                    # score it, five checks
 python3 detect.py before.txt after.txt         # prove the delta
 ```
 
-Both read `slop.json`: 154 stock words and phrases with plain-English
-replacements, 18 invisible character classes, 11 typographic substitutions and
-16 structural tells. The last block of each list is Instagram-specific, the
+Both read `slop.json`, which is the canonical source for the lexicon
+counts (stock words and phrases with plain-English replacements, invisible
+character classes, typographic substitutions and structural tells). The last
+block of each list is Instagram-specific, the
 vocabulary that only shows up in captions and voiceovers. It is meant to be
 edited. If the user has a word they always use that the lexicon strips, take it
 out of the file.
@@ -70,7 +71,9 @@ a sentence needs judgement:
 - Hashtag walls
 - Reflex bait: "follow for more", "tag someone who", "double tap if"
 
-That list is your job. Rewrite each flagged line by hand, keeping the meaning,
+That list is your job (the full set of structural tells is canonical in
+`slop.json`; the bullets above are the ones that recur in captions and
+scripts). Rewrite each flagged line by hand, keeping the meaning,
 then re-run `detect.py`. This is the part that moves the score from REVIEW to
 PASS, and it is the part a script cannot do.
 
