@@ -38,6 +38,9 @@ LEX = os.path.join(HERE, "slop.json")
 
 URL_RE = re.compile(r"https?://\S+|www\.\S+|\S+@\S+\.\S+")
 SENT_RE = re.compile(r"[^.!?\n]+[.!?]*")
+UNIFORM_CV_LIMIT = 0.35  # sentence-length variation below this is flagged
+                         # as uniform. detect.py judges burstiness on its
+                         # own scale; the two values are not the same check.
 
 
 def load_lexicon(path=LEX):
@@ -180,7 +183,7 @@ def scan_structures(text, lex):
         mean = sum(lens) / len(lens)
         var = sum((n - mean) ** 2 for n in lens) / len(lens)
         cv = (var ** 0.5) / mean if mean else 0
-        if cv < 0.35:
+        if cv < UNIFORM_CV_LIMIT:
             flags.append({
                 "name": f"Uniform sentence length (variation {cv:.2f})",
                 "count": len(lens),

@@ -35,6 +35,9 @@ HASHTAG_LIMIT = 5        # Instagram's cap per post or reel since 18 Dec 2025,
                          # rather than many generic ones, can improve both your
                          # content's performance and people's experience".
 
+EMOJI_WARN_PER_100 = 4   # emoji per 100 characters above which the caption
+                         # reads as decoration rather than punctuation.
+
 HASHTAG_RE = re.compile(r"(?:^|\s)(#[A-Za-z0-9_]+)")
 MENTION_RE = re.compile(r"(?:^|\s)(@[A-Za-z0-9_.]+)")
 LINK_RE = re.compile(r"https?://\S+|\bwww\.\S+|\b[a-z0-9-]+\.(?:com|co|io|net|org|ai|app)/\S*",
@@ -150,9 +153,9 @@ def analyse(text, cut=TRUNCATE, keywords=None):
                                "Two asks is the same as none")
 
     density = len(emoji) * 100 / max(chars, 1)
-    add("EMOJI", "WARN" if density > 4 else "PASS",
+    add("EMOJI", "WARN" if density > EMOJI_WARN_PER_100 else "PASS",
         f"{len(emoji)} emoji, {density:.1f} per 100 characters"
-        + (" - reads as decoration" if density > 4 else ""))
+        + (" - reads as decoration" if density > EMOJI_WARN_PER_100 else ""))
 
     if keywords:
         low = stripped.lower()
