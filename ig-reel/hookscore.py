@@ -114,6 +114,40 @@ DEALBREAKERS = [
 ]
 
 
+# Scoring values. Calibrated against real hooks; named so that changing
+# one is a single deliberate edit rather than a hunt through the checks.
+WORDS_PER_SECOND = 2.75          # ~165 words per minute, spoken
+LENGTH_MIN_WORDS = 5
+LENGTH_MAX_WORDS = 12
+LENGTH_SHORT_PENALTY = 20        # per word below the minimum
+LENGTH_LONG_PENALTY = 11         # per word over the maximum
+LENGTH_CHARS_LIMIT = 60          # two lines of big on-screen text
+LENGTH_CHARS_PENALTY = 12
+SPECIFICITY_NO_HIT_SCORE = 15.0
+SPECIFICITY_BASE_SCORE = 45
+SPECIFICITY_PER_HIT = 30
+STAKES_NO_HIT_SCORE = 20.0
+STAKES_ONE_HIT_SCORE = 70.0
+STAKES_MANY_HIT_SCORE = 100.0
+FRONTLOAD_WEAK_OPENER_PENALTY = 30
+FRONTLOAD_NO_PAYLOAD_SCORE = 30.0
+FRONTLOAD_EARLY_SCORE = 100.0
+FRONTLOAD_MID_SCORE = 70.0
+FRONTLOAD_LATE_SCORE = 40.0
+FRONTLOAD_EARLY_LIMIT = 3        # payload word index at or below this
+FRONTLOAD_MID_LIMIT = 6
+ADDRESS_YOU_SCORE = 100.0
+ADDRESS_IMPERATIVE_SCORE = 90.0
+ADDRESS_FIRST_PERSON_SCORE = 70.0
+ADDRESS_THIRD_PERSON_SCORE = 35.0
+OVERALL_MEAN_WEIGHT = 0.6
+OVERALL_MIN_WEIGHT = 0.4
+DEALBREAKER_PENALTY = 15         # per dealbreaker flag
+STRONG_THRESHOLD = 70
+STRONG_MIN_CHECK = 55
+OK_THRESHOLD = 50
+
+
 def clamp(n):
     return max(0.0, min(100.0, n))
 
@@ -122,16 +156,16 @@ def check_length(text):
     """A hook has to land before the thumb moves. Roughly two seconds."""
     w = words(text)
     n = len(w)
-    secs = n / 2.75                      # ~165 words per minute, spoken
+    secs = n / WORDS_PER_SECOND
     chars = len(text.strip())
-    if 5 <= n <= 12:
+    if LENGTH_MIN_WORDS <= n <= LENGTH_MAX_WORDS:
         score = 100.0
-    elif n < 5:
-        score = clamp(100 - (5 - n) * 20)
+    elif n < LENGTH_MIN_WORDS:
+        score = clamp(100 - (LENGTH_MIN_WORDS - n) * LENGTH_SHORT_PENALTY)
     else:
-        score = clamp(100 - (n - 12) * 11)
-    if chars > 60:                       # two lines of big on-screen text
-        score -= 12
+        score = clamp(100 - (n - LENGTH_MAX_WORDS) * LENGTH_LONG_PENALTY)
+    if chars > LENGTH_CHARS_LIMIT:
+        score -= LENGTH_CHARS_PENALTY
     return clamp(score), f"{n} words, {chars} chars, ~{secs:.1f}s spoken (want 5-12 words)"
 
 
@@ -142,7 +176,8 @@ def check_specificity(text):
     low = [w.lower().strip("'’") for w in words(text)]
     spoken = [w for w in low if w in SPOKEN_NUMBERS or w in MONEY_WORDS]
     hits = len(nums) + len(propers) + len(spoken)
-    score = 15.0 if hits == 0 else clamp(45 + hits * 30)
+    score = (SPECIFICITY_NO_HIT_SCORE if hits == 0
+             else clamp(SPECIFICITY_BASE_SCORE + hits * SPECIFICITY_PER_HIT))
     found = ", ".join(nums[:2] + sorted(propers)[:2] + spoken[:2])
     return score, (f"{hits} concrete marker(s)" + (f": {found}" if found else
                    " - no number, no name, nothing checkable"))
@@ -156,7 +191,8 @@ def check_stakes(text):
     if re.search(r"\$\s?\d", text):
         markers.append("a price")
     n = len(markers)
-    score = {0: 20.0, 1: 70.0}.get(n, 100.0)
+    score = {0: STAKES_NO_HIT_SCORE, 1: STAKES_ONE_HIT_SCORE}.get(
+        n, STAKES_MANY_HIT_SCORE)
     detail = f"{n} tension marker(s)" + (f": {', '.join(markers[:4])}" if markers else
                                          " - nothing is at stake in this line")
     return clamp(score), detail
@@ -173,7 +209,7 @@ def check_frontload(text):
     hit_opener = None
     for weak in WEAK_OPENERS:
         if opener.startswith(weak) or low[0] == weak:
-            penalty, hit_opener = 30, weak
+            penalty, hit_opener = FRONTLOAD_WEAK_OPENER_PENALTY, weak
             break
     payload = None
     for i, token in enumerate(low):
@@ -182,16 +218,16 @@ def check_frontload(text):
             payload = i
             break
     if payload is None:
-        base = 30.0
+        base = FRONTLOAD_NO_PAYLOAD_SCORE
         where = "no payload word anywhere in the line"
-    elif payload <= 3:
-        base = 100.0
+    elif payload <= FRONTLOAD_EARLY_LIMIT:
+        base = FRONTLOAD_EARLY_SCORE
         where = f"payload at word {payload + 1}"
-    elif payload <= 6:
-        base = 70.0
+    elif payload <= FRONTLOAD_MID_LIMIT:
+        base = FRONTLOAD_MID_SCORE
         where = f"payload at word {payload + 1}, could move forward"
     else:
-        base = 40.0
+        base = FRONTLOAD_LATE_SCORE
         where = f"payload at word {payload + 1}, too late"
     detail = where + (f"; weak opener \"{hit_opener}\"" if hit_opener else "")
     return clamp(base - penalty), detail
@@ -202,12 +238,12 @@ def check_address(text):
     low = text.lower()
     w = [x.lower().strip("'’") for x in words(text)]
     if re.search(r"\b(you|your|you're|youre|yourself)\b", low):
-        return 100.0, "speaks to the viewer"
+        return ADDRESS_YOU_SCORE, "speaks to the viewer"
     if w and w[0] in IMPERATIVES:
-        return 90.0, f"imperative opener (\"{w[0]}\")"
+        return ADDRESS_IMPERATIVE_SCORE, f"imperative opener (\"{w[0]}\")"
     if re.search(r"\b(i|my|me|we|our)\b", low):
-        return 70.0, "first person, no viewer named"
-    return 35.0, "third person, nobody in the room"
+        return ADDRESS_FIRST_PERSON_SCORE, "first person, no viewer named"
+    return ADDRESS_THIRD_PERSON_SCORE, "third person, nobody in the room"
 
 
 CHECKS = ["LENGTH", "SPECIFICITY", "STAKES", "FRONTLOAD", "ADDRESS"]
@@ -225,10 +261,13 @@ def run(text):
     scores = [results[c][0] for c in CHECKS]
     # The weakest property caps the hook, same logic as detect.py: one bad
     # property is enough for the thumb to keep moving.
-    overall = statistics.mean(scores) * 0.6 + min(scores) * 0.4 - len(flags) * 15
+    overall = (statistics.mean(scores) * OVERALL_MEAN_WEIGHT
+               + min(scores) * OVERALL_MIN_WEIGHT
+               - len(flags) * DEALBREAKER_PENALTY)
     overall = clamp(overall)
-    verdict = "STRONG" if overall >= 70 and min(scores) >= 55 and not flags else (
-        "OK" if overall >= 50 else "WEAK")
+    verdict = ("STRONG" if overall >= STRONG_THRESHOLD
+               and min(scores) >= STRONG_MIN_CHECK and not flags else (
+                   "OK" if overall >= OK_THRESHOLD else "WEAK"))
     return results, overall, verdict, flags
 
 
@@ -306,7 +345,7 @@ def main():
     else:
         render_table(sorted(payload, key=lambda r: -r["score"]))
 
-    sys.exit(0 if max(p["score"] for p in payload) >= 70 else 1)
+    sys.exit(0 if max(p["score"] for p in payload) >= STRONG_THRESHOLD else 1)
 
 
 if __name__ == "__main__":

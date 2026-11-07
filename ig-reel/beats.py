@@ -45,6 +45,9 @@ STOPWORDS = {
 HOOK_WINDOW = 3.0        # seconds. Past this, the thumb has already decided.
 MAX_BEAT = 4.0           # seconds on one idea with no change on screen.
 ABSTRACT_RUN = 3         # beats in a row with nothing checkable in them.
+DEFAULT_WPM = 165        # spoken rate unless --wpm says otherwise.
+LONG_LINE_FACTOR = 1.5   # a line up to MAX_BEAT * this stays a single beat.
+TARGET_TOLERANCE = 0.1   # within this fraction of the target is on target.
 
 
 def pretty(token):
@@ -63,7 +66,7 @@ def split_beats(raw, wps):
     for line in [l.strip() for l in raw.splitlines()]:
         if not line:
             continue
-        if len(words(line)) / wps <= MAX_BEAT * 1.5:
+        if len(words(line)) / wps <= MAX_BEAT * LONG_LINE_FACTOR:
             beats.append(line)
             continue
         # Long paragraph: break it at sentence ends so the timings mean
@@ -82,7 +85,7 @@ def split_beats(raw, wps):
     return beats
 
 
-def analyse(raw, wpm=165, target=None):
+def analyse(raw, wpm=DEFAULT_WPM, target=None):
     wps = wpm / 60.0
     beats = split_beats(raw, wps)
     if not beats:
@@ -158,7 +161,7 @@ def analyse(raw, wpm=165, target=None):
 
     if target:
         delta = total - target
-        if abs(delta) <= target * 0.1:
+        if abs(delta) <= target * TARGET_TOLERANCE:
             notes.append(f"Length is on target ({total:.1f}s against {target}s).")
         elif delta > 0:
             notes.append(f"{delta:.1f}s over target. Cut about {int(delta * wps)} words.")
@@ -194,7 +197,8 @@ def render(a, out=sys.stdout):
 def main():
     ap = argparse.ArgumentParser(description="Time a Reel script into a beat sheet.")
     ap.add_argument("input", nargs="?", default="-", help="script file, or - for stdin")
-    ap.add_argument("--wpm", type=float, default=165, help="speaking rate (default 165)")
+    ap.add_argument("--wpm", type=float, default=DEFAULT_WPM,
+                    help=f"speaking rate (default {DEFAULT_WPM})")
     ap.add_argument("--target", type=float, help="target length in seconds")
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
