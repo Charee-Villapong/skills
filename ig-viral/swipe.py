@@ -34,6 +34,10 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 HOOKS = os.path.join(HERE, "..", "ig-reel", "hooks.json")
+# Same pattern as ig-reel's reeltext.WORD_RE, but swipe counts words with
+# findall directly and does NOT strip thousands separators first, so
+# "$18,000" counts as two words here. That difference is current
+# behaviour, pinned by test_ig_shared_parts_characterization.py.
 WORD_RE = re.compile(r"[A-Za-z0-9$%'’-]+")
 
 try:                                              # optional: score the hooks too

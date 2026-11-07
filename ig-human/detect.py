@@ -70,6 +70,10 @@ NUMBERS = re.compile(r"\b\d[\d,.]*%?\b|\$\d")
 PROPER = re.compile(r"(?<![.!?]\s)(?<!^)\b[A-Z][a-z]{2,}\b", re.MULTILINE)
 
 
+# clamp() and bar() below are identical copies of the ones in
+# ig-reel/hookscore.py; keep them in sync (pinned by
+# ig-viral/test_ig_shared_parts_characterization.py). WORD_RE above is
+# deliberately narrower than the ig-reel one: it drops digits and money.
 def clamp(n):
     return max(0.0, min(100.0, n))
 

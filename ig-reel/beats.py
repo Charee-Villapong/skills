@@ -33,6 +33,8 @@ sys.path.insert(0, HERE)
 from reeltext import WORD_RE, words  # noqa: E402,F401
 
 SENT_RE = re.compile(r"[^.!?]+[.!?]*")
+# Identical copy in ig-caption/caption.py; keep the two in sync
+# (pinned by ig-viral/test_ig_shared_parts_characterization.py).
 CONCRETE_RE = re.compile(r"\$\s?\d|\b\d[\d,.]*\b|(?<!^)\b[A-Z][a-z]{2,}\b", re.MULTILINE)
 STOPWORDS = {
     "the", "a", "an", "and", "or", "but", "if", "of", "to", "in", "on", "for",

@@ -148,6 +148,9 @@ STRONG_MIN_CHECK = 55
 OK_THRESHOLD = 50
 
 
+# clamp() and bar() below are identical copies of the ones in
+# ig-human/detect.py; keep them in sync (pinned by
+# ig-viral/test_ig_shared_parts_characterization.py).
 def clamp(n):
     return max(0.0, min(100.0, n))
 
