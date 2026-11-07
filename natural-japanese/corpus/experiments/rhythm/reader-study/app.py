@@ -21,23 +21,37 @@ STIMULI = HERE / "stimuli.json"
 DATA_DIR = Path(os.environ.get("READER_STUDY_DATA_DIR", HERE / "data"))
 RESPONSES = DATA_DIR / "responses.jsonl"
 CONDITIONS = ("uniform", "varied", "control")
+# 実験条件値（事前登録どおり。値を変える場合は仕様変更として扱う）
+EXPECTED_STIMULUS_COUNT = 12
+# 回答件数は刺激リストの長さから導出せず、12件ちょうどを要求する
+REQUIRED_ANSWER_COUNT = 12
+PARTICIPANT_ID_MIN_LENGTH = 16
+PARTICIPANT_ID_MAX_LENGTH = 64
+RATING_FIELDS = ("monotony", "naturalness", "readability")
+RATING_MIN = 1
+RATING_MAX = 7
+# attention_check も評価と同じ 1〜7 の範囲判定であり、期待値ではない
+COMPREHENSION_MIN = 0
+COMPREHENSION_MAX = 2
+ELAPSED_MS_MIN = 1000
+ELAPSED_MS_MAX = 1_800_000
 WRITE_LOCK = threading.Lock()
 
 
 def load_stimuli() -> list[dict]:
     data = json.loads(STIMULI.read_text(encoding="utf-8"))
-    if len(data) != 12:
-        raise ValueError(f"刺激は12件必要です: {len(data)}件")
+    if len(data) != EXPECTED_STIMULUS_COUNT:
+        raise ValueError(f"刺激は{EXPECTED_STIMULUS_COUNT}件必要です: {len(data)}件")
     return data
 
 
 def assignment(participant_id: str, stimuli: list[dict]) -> list[dict]:
     """参加者IDから再現可能なラテン方格割付と提示順を作る。"""
     digest = hashlib.sha256(participant_id.encode()).digest()
-    list_index = digest[0] % 3
+    list_index = digest[0] % len(CONDITIONS)
     assigned = []
     for index, item in enumerate(stimuli):
-        condition = CONDITIONS[(index + list_index) % 3]
+        condition = CONDITIONS[(index + list_index) % len(CONDITIONS)]
         assigned.append({
             "id": item["id"],
             "genre": item["genre"],
@@ -51,13 +65,15 @@ def assignment(participant_id: str, stimuli: list[dict]) -> list[dict]:
 
 def validate_submission(payload: dict, stimuli: list[dict]) -> tuple[bool, str]:
     participant_id = payload.get("participant_id")
-    if not isinstance(participant_id, str) or not 16 <= len(participant_id) <= 64:
+    if not isinstance(participant_id, str) or not (
+        PARTICIPANT_ID_MIN_LENGTH <= len(participant_id) <= PARTICIPANT_ID_MAX_LENGTH
+    ):
         return False, "participant_idが不正です"
-    if payload.get("attention_check") not in range(1, 8):
+    if payload.get("attention_check") not in range(RATING_MIN, RATING_MAX + 1):
         return False, "注意確認項目が不正です"
     answers = payload.get("answers")
-    if not isinstance(answers, list) or len(answers) != 12:
-        return False, "回答は12件必要です"
+    if not isinstance(answers, list) or len(answers) != REQUIRED_ANSWER_COUNT:
+        return False, f"回答は{REQUIRED_ANSWER_COUNT}件必要です"
     expected = {item["id"]: item for item in assignment(participant_id, stimuli)}
     seen = set()
     for answer in answers:
@@ -67,13 +83,17 @@ def validate_submission(payload: dict, stimuli: list[dict]) -> tuple[bool, str]:
         seen.add(item_id)
         if answer.get("condition") != expected[item_id]["condition"]:
             return False, "条件割付が不正です"
-        for field in ("monotony", "naturalness", "readability"):
-            if answer.get(field) not in range(1, 8):
-                return False, f"{field}は1〜7で回答してください"
-        if answer.get("comprehension") not in {0, 1, 2}:
+        for field in RATING_FIELDS:
+            if answer.get(field) not in range(RATING_MIN, RATING_MAX + 1):
+                return False, (f"{field}は{RATING_MIN}〜{RATING_MAX}で回答してください")
+        if answer.get("comprehension") not in range(
+            COMPREHENSION_MIN, COMPREHENSION_MAX + 1
+        ):
             return False, "理解問題の回答が不正です"
         elapsed = answer.get("elapsed_ms")
-        if not isinstance(elapsed, int) or not 1000 <= elapsed <= 1_800_000:
+        if not isinstance(elapsed, int) or not (
+            ELAPSED_MS_MIN <= elapsed <= ELAPSED_MS_MAX
+        ):
             return False, "回答時間が不正です"
     return True, ""
 
