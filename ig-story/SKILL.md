@@ -56,7 +56,11 @@ them to `/ig-reel` as formula #16.
 - **One idea per frame.** Reading a paragraph on a story is not a thing anyone
   does.
 - **Keep text inside the middle.** On 1080x1920, nothing above y=250 or below
-  y=1600. The profile row sits on top and the reply bar sits underneath.
+  y=1600. The profile row sits on top and the reply bar sits underneath. These
+  values come from the story viewer's interface: the profile row at the top
+  and the reply bar at the bottom. They differ from the ig-reel safe zone
+  (y=230–1440), which comes from the Reels player interface, and the two
+  ranges must not be unified.
 - **Talk to one person.** "You" singular. Stories are the closest thing to a
   DM that is not one.
 - **Do not repost your own feed post to stories with no comment.** It is the

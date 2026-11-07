@@ -104,7 +104,10 @@ Write it separately, every time. It is read before it is heard.
 - **Keep it inside the safe zone.** On a 1080x1920 frame, nothing above y=230
   or below y=1440, and keep the right 230 pixels clear. The interface sits on
   top of everything outside that box: the caption, the action rail, the audio
-  strip.
+  strip. These values come from the Reels player interface: they clear the
+  caption, the action rail and the audio strip that overlay the frame. They
+  differ from the ig-story range (y=250–1600), which comes from the story
+  viewer's interface, and the two ranges must not be unified.
 - **Never put the hook where the caption sits.** That is the bottom of the
   frame and it is covered.
 - **Burn in captions for the body.** Most people watch muted first.
