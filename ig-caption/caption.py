@@ -79,6 +79,93 @@ def render_box(window, truncated, out=sys.stdout, width=52):
     print("  +" + "-" * (width + 2 - len(tail) - 2) + f" {tail} " + "+", file=out)
 
 
+def _check(name, status, detail):
+    return {"check": name, "status": status, "detail": detail}
+
+
+def _length_check(chars):
+    return _check("LENGTH", "FAIL" if chars > LIMIT else "PASS",
+                  f"{chars} / {LIMIT} characters" + (f", {chars - LIMIT} over the limit"
+                                                     if chars > LIMIT else ""))
+
+
+def _first_line_check(first_line, cut):
+    if not first_line:
+        return _check("FIRST LINE", "FAIL", "the caption opens on a blank line")
+    if first_line.startswith("#") or first_line.startswith("@"):
+        return _check("FIRST LINE", "FAIL",
+                      "opens on a hashtag or a mention, which is the one position worth a sentence")
+    if len(first_line) > cut:
+        return _check("FIRST LINE", "WARN",
+                      f"{len(first_line)} characters, so it gets cut at {cut} mid-thought. "
+                      "Fine if the cut is a cliffhanger, bad if it is a subordinate clause")
+    return _check("FIRST LINE", "PASS", f"{len(first_line)} characters, lands whole")
+
+
+def _hook_concrete_check(window):
+    return _check("HOOK IS CONCRETE", "PASS" if CONCRETE_RE.search(window) else "WARN",
+                  f"{len(CONCRETE_RE.findall(window))} number(s) or name(s) in the visible window"
+                  + ("" if CONCRETE_RE.search(window) else " - nothing checkable before the tap"))
+
+
+def _hashtags_check(tags, filler):
+    if len(tags) > HASHTAG_LIMIT:
+        return _check("HASHTAGS", "FAIL", f"{len(tags)} tags, over Instagram's cap of {HASHTAG_LIMIT}. "
+                                          "Tags past the fifth do not count and the block reads as old")
+    if len(tags) == HASHTAG_LIMIT and filler:
+        return _check("HASHTAGS", "WARN", f"{len(tags)} tags, at the cap, and "
+                                          f"{len(filler)} of them generic. Spend the five on topics")
+    if filler:
+        return _check("HASHTAGS", "WARN", f"{len(tags)} tags, {len(filler)} of them generic "
+                                          f"({', '.join(filler[:3])}). Those describe nothing")
+    return _check("HASHTAGS", "PASS", f"{len(tags)} tag(s)" + (f": {' '.join(tags)}" if tags else ""))
+
+
+def _tag_placement_check(tags, window):
+    if not tags:
+        return _check("TAG PLACEMENT", "PASS", "no tags to place")
+    if any(re.search(r"(?:^|\s)" + re.escape(t) + r"\b", window) for t in tags):
+        return _check("TAG PLACEMENT", "WARN", "a hashtag is inside the visible window, "
+                                               "spending feed space on a label")
+    return _check("TAG PLACEMENT", "PASS", "tags are below the fold")
+
+
+def _links_check(links):
+    return _check("LINKS", "WARN" if links else "PASS",
+                  f"{len(links)} link(s) in the caption, and captions are not clickable. "
+                  f"Move it to the bio or the DM" if links else "no dead links in the body")
+
+
+def _one_ask_check(asks):
+    if len(asks) == 1:
+        return _check("ONE ASK", "PASS", f"one call to action: {asks[0]}")
+    if not asks:
+        return _check("ONE ASK", "WARN", "no call to action. Decide what this post is for")
+    return _check("ONE ASK", "WARN", f"{len(asks)} asks ({', '.join(asks)}). "
+                                     "Two asks is the same as none")
+
+
+def _emoji_check(emoji_count, chars):
+    density = emoji_count * 100 / max(chars, 1)
+    return _check("EMOJI", "WARN" if density > EMOJI_WARN_PER_100 else "PASS",
+                  f"{emoji_count} emoji, {density:.1f} per 100 characters"
+                  + (" - reads as decoration" if density > EMOJI_WARN_PER_100 else ""))
+
+
+def _search_terms_check(keywords, stripped, window):
+    if not keywords:
+        return None
+    low = stripped.lower()
+    found = [k for k in keywords if k.lower() in low]
+    missing = [k for k in keywords if k.lower() not in low]
+    in_window = [k for k in found if k.lower() in window.lower()]
+    status = "PASS" if not missing else ("WARN" if found else "FAIL")
+    return _check("SEARCH TERMS", status,
+                  f"{len(found)}/{len(keywords)} present"
+                  + (f", {len(in_window)} in the visible window" if found else "")
+                  + (f". Missing: {', '.join(missing)}" if missing else ""))
+
+
 def analyse(text, cut=TRUNCATE, keywords=None):
     text = text.rstrip()
     stripped = text.strip()
@@ -95,78 +182,19 @@ def analyse(text, cut=TRUNCATE, keywords=None):
     filler = [t for t in tags if t.lower() in FILLER_TAGS]
     keywords = [k.strip() for k in (keywords or []) if k.strip()]
 
-    checks = []
-
-    def add(name, status, detail):
-        checks.append({"check": name, "status": status, "detail": detail})
-
-    add("LENGTH", "FAIL" if chars > LIMIT else "PASS",
-        f"{chars} / {LIMIT} characters" + (f", {chars - LIMIT} over the limit"
-                                           if chars > LIMIT else ""))
-
-    if not first_line:
-        add("FIRST LINE", "FAIL", "the caption opens on a blank line")
-    elif first_line.startswith("#") or first_line.startswith("@"):
-        add("FIRST LINE", "FAIL",
-            "opens on a hashtag or a mention, which is the one position worth a sentence")
-    elif len(first_line) > cut:
-        add("FIRST LINE", "WARN",
-            f"{len(first_line)} characters, so it gets cut at {cut} mid-thought. "
-            "Fine if the cut is a cliffhanger, bad if it is a subordinate clause")
-    else:
-        add("FIRST LINE", "PASS", f"{len(first_line)} characters, lands whole")
-
-    add("HOOK IS CONCRETE", "PASS" if CONCRETE_RE.search(window) else "WARN",
-        f"{len(CONCRETE_RE.findall(window))} number(s) or name(s) in the visible window"
-        + ("" if CONCRETE_RE.search(window) else " - nothing checkable before the tap"))
-
-    if len(tags) > HASHTAG_LIMIT:
-        add("HASHTAGS", "FAIL", f"{len(tags)} tags, over Instagram's cap of {HASHTAG_LIMIT}. "
-                                "Tags past the fifth do not count and the block reads as old")
-    elif len(tags) == HASHTAG_LIMIT and filler:
-        add("HASHTAGS", "WARN", f"{len(tags)} tags, at the cap, and "
-                                f"{len(filler)} of them generic. Spend the five on topics")
-    elif filler:
-        add("HASHTAGS", "WARN", f"{len(tags)} tags, {len(filler)} of them generic "
-                                f"({', '.join(filler[:3])}). Those describe nothing")
-    else:
-        add("HASHTAGS", "PASS", f"{len(tags)} tag(s)" + (f": {' '.join(tags)}" if tags else ""))
-
-    if not tags:
-        add("TAG PLACEMENT", "PASS", "no tags to place")
-    elif any(re.search(r"(?:^|\s)" + re.escape(t) + r"\b", window) for t in tags):
-        add("TAG PLACEMENT", "WARN", "a hashtag is inside the visible window, "
-                                     "spending feed space on a label")
-    else:
-        add("TAG PLACEMENT", "PASS", "tags are below the fold")
-
-    add("LINKS", "WARN" if links else "PASS",
-        f"{len(links)} link(s) in the caption, and captions are not clickable. "
-        f"Move it to the bio or the DM" if links else "no dead links in the body")
-
-    if len(asks) == 1:
-        add("ONE ASK", "PASS", f"one call to action: {asks[0]}")
-    elif not asks:
-        add("ONE ASK", "WARN", "no call to action. Decide what this post is for")
-    else:
-        add("ONE ASK", "WARN", f"{len(asks)} asks ({', '.join(asks)}). "
-                               "Two asks is the same as none")
-
-    density = len(emoji) * 100 / max(chars, 1)
-    add("EMOJI", "WARN" if density > EMOJI_WARN_PER_100 else "PASS",
-        f"{len(emoji)} emoji, {density:.1f} per 100 characters"
-        + (" - reads as decoration" if density > EMOJI_WARN_PER_100 else ""))
-
-    if keywords:
-        low = stripped.lower()
-        found = [k for k in keywords if k.lower() in low]
-        missing = [k for k in keywords if k.lower() not in low]
-        in_window = [k for k in found if k.lower() in window.lower()]
-        status = "PASS" if not missing else ("WARN" if found else "FAIL")
-        add("SEARCH TERMS", status,
-            f"{len(found)}/{len(keywords)} present"
-            + (f", {len(in_window)} in the visible window" if found else "")
-            + (f". Missing: {', '.join(missing)}" if missing else ""))
+    checks = [
+        _length_check(chars),
+        _first_line_check(first_line, cut),
+        _hook_concrete_check(window),
+        _hashtags_check(tags, filler),
+        _tag_placement_check(tags, window),
+        _links_check(links),
+        _one_ask_check(asks),
+        _emoji_check(len(emoji), chars),
+    ]
+    search_terms = _search_terms_check(keywords, stripped, window)
+    if search_terms:
+        checks.append(search_terms)
 
     fails = sum(1 for c in checks if c["status"] == "FAIL")
     warns = sum(1 for c in checks if c["status"] == "WARN")
