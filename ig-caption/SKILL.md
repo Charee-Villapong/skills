@@ -50,7 +50,7 @@ The ask     one. Comment a keyword, save it, or DM. One.
 Hashtags    up to five, on their own line at the bottom, or none.
 ```
 
-Limit is 2,200 characters and almost nothing needs 2,200. A caption that earns
+The limit is set by `caption.py` (`LIMIT` / `TRUNCATE` / `HASHTAG_LIMIT` are canonical there) and almost nothing needs the full 2,200 characters. A caption that earns
 the tap and then delivers 600 characters beats one that delivers 1,800.
 
 ## Hashtags, honestly
@@ -66,7 +66,7 @@ So: up to five, specific, as topic labels. If the user has a block of twenty
 saved in their notes app, that block is now dead weight and the linter will
 fail it.
 
-`#viral`, `#fyp`, `#explorepage`, `#foryou` describe nothing. Cut them.
+`#viral`, `#fyp`, `#explorepage`, `#foryou` describe nothing. Cut them. (The linter's full generic-tag set is `FILLER_TAGS` in `caption.py`.)
 
 ## Search terms matter more than hashtags now
 
