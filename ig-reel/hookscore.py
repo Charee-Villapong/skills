@@ -32,11 +32,16 @@ Usage
 
 import argparse
 import json
+import os
 import re
 import statistics
 import sys
 
-WORD_RE = re.compile(r"[A-Za-z0-9$%'’-]+")
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+
+from reeltext import WORD_RE, words  # noqa: E402,F401
+
 NUMBER_RE = re.compile(
     r"\$\s?\d[\d,]*(?:\.\d+)?"                       # money, whole
     r"|\b\d[\d,]*(?:\.\d+)?\s?"                      # a figure, with or
@@ -111,11 +116,6 @@ DEALBREAKERS = [
 
 def clamp(n):
     return max(0.0, min(100.0, n))
-
-
-def words(text):
-    # "$18,000" is one word when it is spoken, so it is one word here too.
-    return WORD_RE.findall(re.sub(r"(?<=\d),(?=\d)", "", text))
 
 
 def check_length(text):
