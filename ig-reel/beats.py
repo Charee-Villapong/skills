@@ -85,12 +85,7 @@ def split_beats(raw, wps):
     return beats
 
 
-def analyse(raw, wpm=DEFAULT_WPM, target=None):
-    wps = wpm / 60.0
-    beats = split_beats(raw, wps)
-    if not beats:
-        return None
-
+def _build_rows(beats, wps):
     rows, clock = [], 0.0
     for i, text in enumerate(beats):
         n = len(words(text))
@@ -106,8 +101,10 @@ def analyse(raw, wpm=DEFAULT_WPM, target=None):
             "flags": [],
         })
         clock += dur
-    total = clock
+    return rows, clock
 
+
+def _label_rows(rows, total):
     # Label the structural positions a Reel is actually built around.
     for r in rows:
         if r["n"] == 1 or r["start"] + r["dur"] <= HOOK_WINDOW:
@@ -118,6 +115,8 @@ def analyse(raw, wpm=DEFAULT_WPM, target=None):
         if not r["label"] and r["start"] <= half < r["start"] + r["dur"]:
             r["label"] = "MID"
 
+
+def _hook_notes(rows, wps):
     notes = []
     if rows[0]["dur"] > HOOK_WINDOW:
         rows[0]["flags"].append(f"hook runs {rows[0]['dur']:.1f}s, past the {HOOK_WINDOW:.0f}s mark")
@@ -127,16 +126,23 @@ def analyse(raw, wpm=DEFAULT_WPM, target=None):
     if rows[0]["concrete"] == 0:
         notes.append("Beat 1 has no number and no name in it. Hooks without something "
                      "checkable are the ones that get scrolled.")
+    return notes
 
+
+def _long_beat_notes(rows):
     for r in rows:
         if r["dur"] > MAX_BEAT:
             r["flags"].append(f"{r['dur']:.1f}s on one beat")
     long_beats = [r["n"] for r in rows if r["dur"] > MAX_BEAT]
-    if long_beats:
-        notes.append(f"Beat(s) {', '.join(map(str, long_beats))} run past {MAX_BEAT:.0f}s. "
-                     "Either split the line or change what is on screen inside it. "
-                     "A static frame is where people leave.")
+    if not long_beats:
+        return []
+    return [f"Beat(s) {', '.join(map(str, long_beats))} run past {MAX_BEAT:.0f}s. "
+            "Either split the line or change what is on screen inside it. "
+            "A static frame is where people leave."]
 
+
+def _abstract_run_notes(rows):
+    notes = []
     run, start = 0, None
     for r in rows:
         if r["concrete"] == 0:
@@ -147,27 +153,50 @@ def analyse(raw, wpm=DEFAULT_WPM, target=None):
                              "Put a number, a name or a price in one of them.")
         else:
             run, start = 0, None
+    return notes
 
+
+def _loop_note(rows):
     # Does the last line hand you back to the first one?
     first = {w.lower() for w in words(rows[0]["text"]) if w.lower() not in STOPWORDS}
     last = {w.lower() for w in words(rows[-1]["text"]) if w.lower() not in STOPWORDS}
     loop = sorted(pretty(w) for w in first & last)
     if loop:
-        notes.append(f"Loops: the last beat repeats \"{', '.join(loop[:3])}\" from the hook. "
-                     "Second watches are free reach.")
-    else:
-        notes.append("No loop. The last beat shares no word with the hook, so the video "
-                     "ends flat. Echoing one word from beat 1 is the cheapest replay you get.")
+        return (f"Loops: the last beat repeats \"{', '.join(loop[:3])}\" from the hook. "
+                "Second watches are free reach.")
+    return ("No loop. The last beat shares no word with the hook, so the video "
+            "ends flat. Echoing one word from beat 1 is the cheapest replay you get.")
 
-    if target:
-        delta = total - target
-        if abs(delta) <= target * TARGET_TOLERANCE:
-            notes.append(f"Length is on target ({total:.1f}s against {target}s).")
-        elif delta > 0:
-            notes.append(f"{delta:.1f}s over target. Cut about {int(delta * wps)} words.")
-        else:
-            notes.append(f"{-delta:.1f}s under target. Either add {int(-delta * wps)} words "
-                         "or shoot it short. Short is usually right.")
+
+def _target_note(total, target, wps):
+    if not target:
+        return None
+    delta = total - target
+    if abs(delta) <= target * TARGET_TOLERANCE:
+        return f"Length is on target ({total:.1f}s against {target}s)."
+    if delta > 0:
+        return f"{delta:.1f}s over target. Cut about {int(delta * wps)} words."
+    return (f"{-delta:.1f}s under target. Either add {int(-delta * wps)} words "
+            "or shoot it short. Short is usually right.")
+
+
+def analyse(raw, wpm=DEFAULT_WPM, target=None):
+    wps = wpm / 60.0
+    beats = split_beats(raw, wps)
+    if not beats:
+        return None
+
+    rows, total = _build_rows(beats, wps)
+    _label_rows(rows, total)
+
+    notes = []
+    notes += _hook_notes(rows, wps)
+    notes += _long_beat_notes(rows)
+    notes += _abstract_run_notes(rows)
+    notes.append(_loop_note(rows))
+    target_note = _target_note(total, target, wps)
+    if target_note:
+        notes.append(target_note)
 
     return {
         "wpm": wpm, "target": target,
