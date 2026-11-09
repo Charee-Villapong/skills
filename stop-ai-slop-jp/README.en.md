@@ -42,7 +42,6 @@ stop-ai-slop-jp/
 │   ├── phrases.md        # Phrases to remove
 │   ├── structures.md     # Structural patterns to avoid
 │   └── examples.md       # AI / human transformation pairs
-├── CHANGELOG.md
 ├── README.md
 └── LICENSE
 ```
