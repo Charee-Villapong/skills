@@ -28,6 +28,13 @@ If the idea is one claim, it is neither. Hand it to `/ig-reel` and say so.
 
 ## Structure
 
+Check the deck with `carousel_check.py` in this skill folder before
+rendering: it lists every violation of the limits below, and the deck does
+not go to rendering while any remain. The limits are the tool's variables;
+the defaults are the numbers here. Whether the stake really lands in one
+sentence, and whether a middle slide really holds one idea, stay human
+judgments — the tool checks counts, words and sizes only.
+
 6 to 10 slides. The cap is 20 and 20 is almost always a book nobody finishes.
 Under 5 and the swipe never starts.
 
