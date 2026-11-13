@@ -48,6 +48,13 @@
 
 ## Alternatives for better results
 
-- Run a small pilot batch first when the search returns a large total, and reconcile that batch before you run the rest.
+For a large search total, pilot first:
 
-- Ask the user to confirm the kept categories before a large run, so important mail stays out of the bulk action from the start.
+- Run a small pilot batch first.
+- Reconcile that batch.
+- Run the rest only after the pilot reconciles.
+
+For a large run, confirm what to keep first:
+
+- Ask the user to confirm the kept categories before the run.
+- This keeps important mail out of the bulk action from the start.
