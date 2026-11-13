@@ -30,20 +30,34 @@ hook formula each post used.
 ## What to actually measure
 
 Raw views is the least useful number on the page, because it is mostly a
-function of how many people already follow the account. Compute these instead
-and show the working:
+function of how many people already follow the account. Compute the metrics
+and the ranking with `audit_metrics.py` in this folder, and show the working:
 
-| metric | how | what it tells you |
-| --- | --- | --- |
-| **Outlier multiple** | views / the account's own median views | whether this was a real hit or a normal day |
-| **Non-follower reach** | % of reach from people who do not follow | whether it travelled at all |
-| **Hold at 3s** | viewers still there at 3s / viewers who started | whether the hook worked. This is the hook's grade. |
-| **Average watch time** | straight from insights | whether the middle worked |
-| **Sends per reach** | shares / reach | the strongest single signal you can earn. A send is a person putting their name on it. |
-| **Follows per reach** | follows / reach | whether the profile converted the attention |
+```bash
+python3 audit_metrics.py posts.json --median-views 4100
+```
+
+Per post it computes:
+
+- **Outlier multiple** — views / the account's own median views. Whether
+  this was a real hit or a normal day.
+- **Non-follower reach** — % of reach from people who do not follow.
+  Whether it travelled at all.
+- **Hold at 3s** — viewers still there at 3s / viewers who started.
+  Whether the hook worked. This is the hook's grade.
+- **Average watch time** — straight from insights. Whether the middle
+  worked.
+- **Sends per reach** — shares / reach. The strongest single signal you
+  can earn. A send is a person putting their name on it.
+- **Follows per reach** — follows / reach. Whether the profile converted
+  the attention.
 
 Rank by outlier multiple and sends per reach, not views. A reel with 4,000
 views and 90 sends beat the one with 60,000 views and 11.
+
+The tool ranks and gives a tendency only when the sample is at or above
+30 posts (its `--min-sample` variable). Below that it returns the metrics
+with no ranking and no tendency.
 
 ## Then find the pattern
 
