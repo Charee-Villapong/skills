@@ -22,11 +22,9 @@
 
 ## Verify before you report
 
-- Read the tab again after every structural change and compare each summary position and formula range with the record you made before the change.
+- Read the tab again after every structural change and compare it with the record you made before the change, using `verify_structure.py` in this skill folder: pass the before record and the after reading as JSON. It compares each summary position and formula, each formula range, and each chart's source columns, and fails when a chart reads a hidden column.
 
-- Check each chart on the tab after hiding columns and confirm that it still shows its data.
-
-- Report the change only after the recheck passes, and name any item you restored during the check.
+- Report the change only after the check passes, and name any item you restored during the check (pass them as `restored` so they are named in the result).
 
 - Do not report a total or a chart as correct when the recheck is still open.
 
