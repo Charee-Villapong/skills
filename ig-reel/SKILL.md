@@ -62,9 +62,13 @@ nothing else does.
 three formulas that genuinely fit it, and write the spoken line plus the
 on-screen line for each. Different formulas, not three rewrites of one.
 
-**2. Score them.** Put the three spoken lines in a file, one per line, and run
-`hookscore.py`. Show the user the ranking. If the top one is under 50, you do
-not have the hook yet and no amount of editing fixes that.
+**2. Score them, then gate on the top score.** Put the three spoken lines
+in a file, one per line, and run `hookscore.py`. Show the user the ranking.
+Then pipe the scores through `hook_gate.py` in this folder:
+`python3 hookscore.py hooks.txt --json | python3 hook_gate.py -`.
+Only proceed to step 3 when it returns `proceed`. The floor is the tool's
+`--min-score` variable (default 50): under it, you do not have the hook yet
+and no amount of editing fixes that — rewrite the hooks instead.
 
 **3. Write the script** on the winning hook. Plain spoken language, the way the
 user actually talks. Contractions. Short lines. No sentence they would have to
