@@ -51,6 +51,14 @@ them to `/ig-reel` as formula #16.
 
 ## Rules
 
+Check the sequence with `story_check.py` in this skill folder before
+preparing anything for posting: it lists every violation of the frame
+count, the safe zone, the ask position and the first-frame rule below, and
+the sequence does not go ahead while any remain. The numbers are the
+tool's variables; the defaults are the ones here. One idea per frame,
+talking to one person, and the selling sequence below stay human
+judgments — the tool checks counts, positions and sizes only.
+
 - **A face or a hand in the first frame.** Text on a coloured background gets
   tapped through, and the first frame decides whether the rest get watched.
 - **One idea per frame.** Reading a paragraph on a story is not a thing anyone
