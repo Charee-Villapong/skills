@@ -13,7 +13,13 @@ description: >-
 # ig-viral
 
 The research skill. Everything else in this pack writes; this one goes and
-looks. Run it monthly, not daily. Formulas last a season.
+looks.
+
+**How often:** run it once a month. Not daily.
+
+**When the results go stale:** a formula lasts about one season (roughly
+three months). If the swipe file is older than one season, treat it as out
+of date and run this again before relying on it.
 
 One tool lives in this folder and it runs:
 
