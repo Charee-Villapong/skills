@@ -16,15 +16,13 @@
 
 ## Count only from the executed log
 
-- Read the executed log after the run finishes and build every number from that log.
+- Build every number from the executed log, never from the search result: a search result is a candidate list, not proof that an action happened.
 
-- Exclude already done items from the newly done total even when they appeared in your search.
+- Verify the split with `reconcile.py` in this skill folder before reporting: feed it the searched item ids and the executed log as JSON. It recounts the five buckets and fails unless searched equals already done plus newly done plus kept, with restored items never counted as newly done.
 
-- Recheck the scope when the searched total and the executed total differ, and resolve the gap before you report anything.
+- When the check fails, recheck the scope and resolve the gap before you report anything.
 
 - State the search scope with each count, including the sender or folder and the date range you used.
-
-- Treat a search result as a candidate list, never as proof that an action happened.
 
 ## Report the split and correct it plainly
 
