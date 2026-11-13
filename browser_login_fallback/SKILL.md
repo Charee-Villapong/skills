@@ -10,13 +10,20 @@
 
 ## Offer the user device fallback
 
-- Ask the user to finish the setting on their own phone or computer when the assistant browser route fails.
+Offer this fallback when either condition is met:
 
-- Give the exact setting to change and the exact path to it when you know the path.
+- `login_attempts.py` returns `stop_fallback`
+- No other login route is offered
 
-- Do not claim the setting changed until the user confirms the change or you can verify the setting yourself.
+Then do this:
 
-- Reload the settings page and check the setting state when you have access after a change.
+- Ask the user to finish the setting on their own phone or computer.
+- Give the exact setting to change and the exact path to it, when you know the path.
+
+Confirm the change before you report it:
+
+- Do not claim the setting changed until the user confirms the change, or you can verify the setting yourself.
+- If you have access after the change, reload the settings page and check the setting state.
 
 ## Keep the requested task separate from cleanup
 
