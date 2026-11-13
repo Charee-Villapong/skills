@@ -71,8 +71,12 @@ and be willing to conclude something the user will not like:
 - **Length.** Group into under 15s, 15 to 30s, 30 to 60s, over 60s.
 - **Theme.**
 - **Whether the user replied to comments in the first hour.**
-- **Day and time.** Check this **last** and only if the others show nothing.
-  It is almost never the cause and it is where people want it to be.
+- **Day and time.** Check this last, and only in one case:
+  - Order: after every other point above.
+  - When: only if none of the other points shows a difference between
+    the top five and the bottom five.
+  - Note: it is almost never the cause, and it is where people want it
+    to be. Do not start here.
 
 State the finding as a claim with the evidence attached, and say how confident
 it is. With 30 posts you can see a pattern. With 6 you cannot, and saying so is
