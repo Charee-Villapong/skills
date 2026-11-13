@@ -50,7 +50,9 @@
 
 - After step 7, summarise the completed record and ask the user to confirm before saving anything.
 
-- Save confirmed records to the Google Sheets spreadsheet 思考記録（CBT） with ID 1hChGEU-3_Xr44f_uCBApf8j7T_Abv4L7bVYxLBVFjkI, tab 記録, one row per record with columns 日付, 曜日, 天気, 気温, 湿度, 状況, 気分（前）, 自動思考, 認知のゆがみ, 根拠, 反証・別の視点, バランス思考, 気分（後）. Write mood entries as the emotion name with its percentage, such as 不安 80%. For 天気, 気温 and 湿度, record the weather in Adachi, Tokyo at the time of the record when it can be checked (such as 雨, 25℃, 79%); leave them blank rather than guessing when they cannot be checked.
+- Before saving, validate the row with `record_row.py` in this skill folder: it checks the row has exactly the 13 columns in order, that 気分（前） and 気分（後） are written as the emotion name with its percentage (such as 不安 80%), and that each percentage is within 0–100. If it reports errors, fix the row and do not save until it passes.
+
+- Save confirmed records to the Google Sheets spreadsheet 思考記録（CBT） with ID 1hChGEU-3_Xr44f_uCBApf8j7T_Abv4L7bVYxLBVFjkI, tab 記録, one row per record with columns 日付, 曜日, 天気, 気温, 湿度, 状況, 気分（前）, 自動思考, 認知のゆがみ, 根拠, 反証・別の視点, バランス思考, 気分（後）. For 天気, 気温 and 湿度, record the weather in Adachi, Tokyo at the time of the record when it can be checked (such as 雨, 25℃, 79%); leave them blank rather than guessing when they cannot be checked.
 
 - Append with `hatch_gws_cli sheets spreadsheets values append` from /opt/hatch/bin and read the row back to verify it landed.
 
