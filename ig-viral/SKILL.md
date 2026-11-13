@@ -28,12 +28,23 @@ python3 swipe.py captured.tsv --out ~/.claude/instagram/swipe.md
 doing 400,000 views found something, and that something is copyable.
 
 So everything here ranks on the **outlier multiple**: views divided by that
-account's own recent median. Anything above 3x is a signal. Anything below 1.5x
-is that account's normal day and it teaches you nothing, no matter how big the
-number looks.
+account's own recent median.
 
-Collect accounts **within about 10x of the user's own size**. A formula that
-works at 2M followers often works because it is at 2M followers.
+Classify each collected row with `outlier_signal.py` in this folder:
+
+```bash
+python3 outlier_signal.py captured.tsv --user-followers 4000
+```
+
+- At or above 3x is a signal. Below 1.5x is that account's normal day and it
+  teaches you nothing, no matter how big the number looks. Between the two it
+  is neither. The limits are the tool's `--signal-threshold` and
+  `--normal-threshold` variables; the defaults are the numbers above.
+- Collect accounts **within about 10x of the user's own size** (the tool's
+  `--size-ratio`). A formula that works at 2M followers often works because
+  it is at 2M followers. With `--user-followers` set, a row outside the
+  range comes back as `out_of_range` and is not classified as a signal.
+- A row with no median is not classified. The tool lists it under `missing`.
 
 ## Step 1: pick the accounts
 

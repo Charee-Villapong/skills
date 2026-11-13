@@ -57,16 +57,23 @@ draft had an em dash in it" is a Reel.
 
 ## When to post
 
-Post when the user's audience is awake and not at work. For most consumer
-audiences that is early evening local time; for a business audience, early
-morning.
+Guide times, by audience:
 
-But say this plainly: **the hour matters far less than the first two seconds.**
-Instagram will keep showing a Reel for days if it performs, and will bury a
-well-timed one that does not. If the user is optimising posting times before
-their hooks work, they are polishing the wrong thing, and you should say so.
+- Consumer audience: early evening, local time.
+- Business audience: early morning, local time.
 
-Anchor times to the audience's timezone, not the user's, if those differ.
+Local time means the audience's timezone. If the audience and the user
+are in different timezones, use the audience's.
+
+These times apply only when both of these hold:
+
+- The audience is awake.
+- The audience is not at work.
+
+Priority: the hour matters far less than the first two seconds. A Reel
+that performs keeps being shown for days; a well-timed Reel that does
+not perform gets buried. If the user is working on posting times before
+their hooks work, say plainly that they are polishing the wrong thing.
 
 ## The engagement round, which is not optional
 
