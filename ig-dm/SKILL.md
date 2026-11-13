@@ -94,8 +94,14 @@ concrete about who does what.
 
 Two. That is the number.
 
-- **+4 days** - add something new. Never "just bumping this". If there is
-  nothing new, there is no follow-up.
+- Track follow-ups with `follow_up_guard.py` in this skill folder, keeping
+  its state file across sends: run `check` before sending and record each
+  send with `send`. It stops an attempt past the limit of two and returns
+  `stop_limit_reached` — stop then, and close the loop. The limit and the
+  schedule are the tool's variables (`--max-follow-ups` and the module
+  constants); the defaults are the numbers below.
+- **+4 days** - add something new. Never "just bumping this" (the tool
+  blocks that phrase). If there is nothing new, there is no follow-up.
 - **+10 days** - the close-the-loop message. Say you will stop, and mean it.
   This one gets a surprising share of the total replies, because it removes the
   pressure.
