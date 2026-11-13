@@ -36,9 +36,15 @@ asset and pull out the things that stand alone:
 | **Mistakes** | every admission of something that went wrong |
 | **Lines** | every sentence already quotable as-is |
 
-List what you found, with counts, before writing anything. If the asset yields
-fewer than four items, it is thin, and four posts squeezed out of it will be
-thin too. Say that.
+List what you found, with counts, before writing anything, and judge the
+counts with `extract_check.py` in this skill folder: it prints the total,
+the thinness verdict and the recommended number of posts as JSON, and exits
+non-zero when the material is thin. If the asset yields fewer than four
+items in total, it is thin, and four posts squeezed out of it will be thin
+too. Say that, and narrow the number of posts instead of proceeding to the
+weekly plan. The minimum and the post cap are the tool's variables
+(`--min-total` and `--max-posts`); the defaults are four items and six
+posts.
 
 ## Then pick the format per extract
 
