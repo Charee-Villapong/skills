@@ -29,20 +29,26 @@ If they do not exist, ask for four things and write them down:
 
 ## What to post
 
-Four to five posts a week, and at least three of them Reels. Reels are the only
-format on Instagram that reliably reaches people who do not follow the account.
-Carousels go deep with the people who already do. Stories are daily and are
-planned separately.
+Check the composition with `plan_check.py` in this folder before the plan
+is final. It lists every violation of the weekly counts (four to five
+posts, at least three of them Reels), the per-type counts and formats,
+and the rule that no two posts of the same type sit back to back. If it
+reports violations, fix the plan and check again; do not finalise a
+failing plan. The limits are the tool's `--min-posts`, `--max-posts` and
+`--min-reels` variables and its `TYPE_RULES`; the defaults are the
+numbers above.
 
-Mix across the week, never two of the same type back to back:
+Reels are the only format on Instagram that reliably reaches people who
+do not follow the account. Carousels go deep with the people who already
+do. Stories are daily and are planned separately.
 
-| type | share | job |
-| --- | --- | --- |
-| **Proof** | 1 per week | something that happened, with a number. Reel. |
-| **Teach** | 1 to 2 per week | one thing the viewer can do today. Reel or carousel. |
-| **Opinion** | 1 per week | a position that could lose you followers. Reel. |
-| **Story** | 1 per fortnight | a scene with a cost. Reel. |
-| **Offer** | 1 per fortnight | what you sell, said plainly, no apology. Carousel or stories. |
+What each type is for:
+
+- **Proof** — something that happened, with a number.
+- **Teach** — one thing the viewer can do today.
+- **Opinion** — a position that could lose you followers.
+- **Story** — a scene with a cost.
+- **Offer** — what you sell, said plainly, no apology.
 
 For each slot give: the theme, the specific angle from what actually happened
 this week, the format, and the hook formula number from `ig-reel/hooks.json`.
