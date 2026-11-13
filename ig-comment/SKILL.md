@@ -42,19 +42,20 @@ Pick by what the post actually is. Never default to type 1.
 
 ## Rules
 
-- **One to three sentences.** Instagram comments are read in a narrow column
-  under a video. A paragraph gets collapsed behind "more" and nobody taps it.
-- **Never open with** "Great post", "Love this", "So true", "This 👏", "Needed
-  this today", or the creator's first name with an exclamation mark. All of
-  them are invisible.
-- **No emoji-only comments** and no emoji as the first character.
+- Check every draft with `comment_check.py` in this skill folder before
+  presenting it: it lists violations as JSON and exits non-zero when any
+  are found, so fix them first. It covers one to three sentences, the
+  banned openings ("Great post", "Love this", "So true", "This 👏",
+  "Needed this today", or the creator's first name with an exclamation
+  mark — pass it with `--creator-name`), no emoji-only comments and no
+  emoji as the first character, and no pitching (no link, no "check out
+  my page"). The limits and lists are the tool's variables
+  (`--max-sentences` and the module constants); the defaults are the
+  numbers above.
 - **Never restate the reel.** Everybody watching just watched it.
 - **One idea.** A comment with two points reads as a hijack.
 - **Say the specific thing.** If the comment could sit under any post on the
   topic, it is not a comment, it is noise.
-- **No pitching, ever.** Not the offer, not the link, not "check out my page".
-  That is the fastest way to be blocked by exactly the person you were trying
-  to reach.
 - **Early matters more here than anywhere.** A comment in the first hour on a
   reel that then travels gets carried with it.
 
