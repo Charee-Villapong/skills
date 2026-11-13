@@ -38,6 +38,13 @@
 
 ## Alternatives for better results
 
-- Test a small change on one row or column first when the restructure is large, and verify it before you apply the same change widely.
+For a large restructure, test first:
 
-- Ask the user to approve a fixed summary position before you move a summary block, instead of moving it on your own.
+- Test a small change on one row or column first.
+- Verify that change.
+- Apply the same change widely only after the check passes.
+
+Before you move a summary block:
+
+- Ask the user to approve a fixed summary position.
+- Do not move the block on your own.
