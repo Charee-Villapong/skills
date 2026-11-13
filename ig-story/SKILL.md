@@ -20,8 +20,12 @@ depth, not reach.
 
 ## The daily shape
 
-Three to seven frames a day. Beyond about seven, the tap-forward rate climbs
-and the last frames play to nobody, which is exactly where people put the ask.
+**How many frames:** 3 to 7 a day. Past 7, the tap-forward rate climbs and
+the last frames play to nobody — and that last frame is exactly where
+people put the ask.
+
+**The shape:** the frame count above is only a guide for how many. The
+shape is separate. For a 5-frame day:
 
 ```
 1       THE OPEN     something happening today, with a face or a hand in it.
