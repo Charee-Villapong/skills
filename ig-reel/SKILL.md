@@ -98,18 +98,21 @@ hook formula used and the first line, so `/ig-audit` has a history later.
 
 Write it separately, every time. It is read before it is heard.
 
-- **Six words or fewer per card.** It is being read at arm's length by someone
-  who is not listening yet.
-- **The hook card is up at frame 1**, not after a beat of silence.
-- **Keep it inside the safe zone.** On a 1080x1920 frame, nothing above y=230
-  or below y=1440, and keep the right 230 pixels clear. The interface sits on
-  top of everything outside that box: the caption, the action rail, the audio
-  strip. These values come from the Reels player interface: they clear the
-  caption, the action rail and the audio strip that overlay the frame. They
-  differ from the ig-story range (y=250–1600), which comes from the story
-  viewer's interface, and the two ranges must not be unified.
-- **Never put the hook where the caption sits.** That is the bottom of the
-  frame and it is covered.
+- **Check the cards with `onscreen_check.py`** in this folder before
+  shooting: `python3 onscreen_check.py cards.json` (JSON in, JSON out).
+  It fails the script when any card is over the word limit, outside the
+  safe zone, or the hook card is not up at frame 1, and lists every
+  violation. Do not move to shooting while it fails. The limits are the
+  tool's variables — `--max-words` (default 6 words per card),
+  `--safe-top` / `--safe-bottom` (default y=230 to y=1440 on a
+  1080x1920 frame) and `--right-clear` (default 230 pixels).
+- The safe-zone values come from the Reels player interface: they clear
+  the caption, the action rail and the audio strip that overlay the
+  frame. They differ from the ig-story range (y=250–1600), which comes
+  from the story viewer's interface, and the two ranges must not be
+  unified.
+- **Never put the hook where the caption sits.** That is the bottom of
+  the frame and it is covered.
 - **Burn in captions for the body.** Most people watch muted first.
 
 ## Rules that make the difference
