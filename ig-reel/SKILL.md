@@ -52,9 +52,14 @@ LAST 3s       THE PAYOFF  deliver what the hook promised, then the single ask.
 LAST LINE     THE LOOP    echo one word from the hook so the replay lands clean.
 ```
 
-Length: 15 to 45 seconds is the working range. Reels run to 3 minutes and
-almost nobody should use it. Under 7 seconds the loop counts inflate and
-nothing else does.
+Length: 15 to 45 seconds is the working range. Reels can run to 3 minutes.
+
+- Use the full 3 minutes only when the one idea cannot be delivered well
+  within 45 seconds.
+- Avoid the full length in every other case. Do not use it as the default,
+  and do not stretch a shorter idea to fill it.
+
+Under 7 seconds the loop counts inflate and nothing else does.
 
 ## The loop
 
