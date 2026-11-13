@@ -2,13 +2,11 @@
 
 ## Stop repeating a failed login route
 
-- Stop after one failed attempt with the same login route.
+- Track attempts with `login_attempts.py` in this skill folder, keeping its state file across tries: record each failure and follow its decision. A route stops after one failed attempt, and after the second distinct route fails it returns `stop_fallback` — stop trying new routes and move to the fallback in the next section. The limits are the tool's `--max-same-route` and `--max-distinct-routes` variables; the defaults are the numbers above.
 
 - Name the failure plainly, such as the login card did not arrive or a bot check blocked entry.
 
 - Try a different route only when the site offers one, such as a different sign in method or a code sent by text message.
-
-- Stop trying new routes after the second distinct route fails and move to the fallback in the next section.
 
 ## Offer the user device fallback
 
