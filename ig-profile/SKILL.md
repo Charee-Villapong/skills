@@ -47,28 +47,35 @@ PROFILE SCORE  38/100
 Fix in descending order of points lost. Do not rewrite everything at once, the
 user has to actually go and change each of these.
 
-**1. The name field (30 characters).** The bold line under the photo, not the
+Check the lengths and counts with `profile_check.py` in this folder: name
+options (three options, 30 characters each), the bio (150 characters), the
+pinned posts (three), highlights (four to six), links (one to five) and grid
+covers (nine, four words of text at most each). If it reports violations,
+fix the rewrite and check again. The limits are the tool's variables; the
+defaults are the numbers above.
+
+**1. The name field.** The bold line under the photo, not the
 handle. This is the field Instagram search matches against, and most accounts
 put a name in it and nothing else. Format that works:
-`{Name} | {what you do, in searched words}`. Give three options.
+`{Name} | {what you do, in searched words}`.
 
 **2. Bio line one.** Who this is for and what changes. Not a job title, not
-adjectives, not a pipe-separated list of identities. The rest of the 150
-characters carries one piece of proof or one plain offer.
+adjectives, not a pipe-separated list of identities. The rest of the bio
+carries one piece of proof or one plain offer.
 
 **3. The pinned three.** Three slots, three different jobs: the best proof, the
 clearest explanation of the offer, the best introduction to the person. This is
 the highest-leverage fix on the whole profile and it takes four taps. An
 unpinned grid shows whatever was posted last, which is a coin flip.
 
-**4. Highlights.** Four to six, named for the questions a buyer asks: Pricing,
+**4. Highlights.** Named for the questions a buyer asks: Pricing,
 Results, How it works, About. Not "Random". Delete the rest.
 
-**5. The link.** One destination that matches what the bio just promised. Five
-are allowed; two is already a menu and a menu converts worse than a door.
+**5. The link.** One destination that matches what the bio just promised.
+Two is already a menu and a menu converts worse than a door.
 
-**6. Grid covers.** The first nine at thumbnail size. Reel covers get chosen,
-not left as whatever frame one was. Four words of text on a cover makes a grid
+**6. Grid covers.** At thumbnail size. Reel covers get chosen,
+not left as whatever frame one was. Short cover text makes a grid
 readable in one glance.
 
 ## Output
