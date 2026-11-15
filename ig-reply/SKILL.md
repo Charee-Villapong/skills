@@ -35,6 +35,18 @@ Sort every comment into one of six buckets and say the counts out loud:
 | **SUPPORT** | "🔥", "great post", a tag | a like, and 3 to 8 words at most |
 | **NOISE** | pitch, spam, bad faith, bait | nothing, or one line and out |
 
+Then check the sorted result with `triage_check.py` in this skill folder
+before writing: feed it the assignments as JSON (each comment, its bucket
+and its draft reply, plus the counts you are about to state) and it lists
+violations — a comment in two buckets or an unknown one, stated counts
+that do not match the assignments, buckets out of the order above, a
+SUPPORT reply over eight words, a NOISE reply over one line. It exits
+non-zero when any are found, so fix them first. The bucket order and the
+SUPPORT word limit are the tool's variables (`--max-support-words` and
+the module constants); the defaults are the rules here. Which bucket a
+comment belongs to is a reading judgement and stays with you — the tool
+checks the shape of the result, not the reading.
+
 Write in that order and stop when the value stops.
 
 ## The move most people miss
