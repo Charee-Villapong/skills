@@ -60,10 +60,24 @@ def pick_kicker_title(shapes):
 
 
 def slide_xmls(pptx_path):
-    """スライド XML を番号順に返す（slideN.xml の N 順）。"""
+    """スライド XML を発表順に返す。
+
+    発表順は presentation.xml の sldIdLst が正。ファイル名（slideN.xml）の
+    番号順は、スライドの挿入・移動で発表順とずれることがあるので使わない。
+    """
     with zipfile.ZipFile(pptx_path) as z:
-        names = [n for n in z.namelist() if re.fullmatch(r"ppt/slides/slide\d+\.xml", n)]
-        names.sort(key=lambda n: int(re.search(r"(\d+)\.xml$", n).group(1)))
+        rels = z.read("ppt/_rels/presentation.xml.rels").decode("utf-8")
+        id2target = dict(re.findall(r'Id="([^"]+)"[^>]*Target="([^"]+)"', rels))
+        pres = z.read("ppt/presentation.xml").decode("utf-8")
+        order = re.findall(r'<p:sldId[^>]*r:id="([^"]+)"', pres)
+        names = []
+        for rid in order:
+            target = id2target.get(rid, "")
+            if target.startswith("slides/"):
+                names.append("ppt/" + target)
+        if not names:  # フォールバック（壊れた presentation.xml 用）
+            names = [n for n in z.namelist() if re.fullmatch(r"ppt/slides/slide\d+\.xml", n)]
+            names.sort(key=lambda n: int(re.search(r"(\d+)\.xml$", n).group(1)))
         return [z.read(n).decode("utf-8") for n in names]
 
 

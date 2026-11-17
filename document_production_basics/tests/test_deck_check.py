@@ -41,3 +41,28 @@ def test_no_title_sized_text():
 def test_empty_slide():
     assert parse_slide(slide_xml([])) == []
     assert pick_kicker_title([]) == ("", "")
+
+
+def test_slide_order_follows_presentation(tmp_path):
+    """ファイル名の番号順ではなく presentation.xml の発表順に従うこと。"""
+    import zipfile
+
+    from deck_check import slide_texts
+
+    path = tmp_path / "deck.pptx"
+    with zipfile.ZipFile(path, "w") as z:
+        z.writestr(
+            "ppt/presentation.xml",
+            '<p:presentation xmlns:p="%s" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+            '<p:sldIdLst><p:sldId id="1" r:id="rId2"/><p:sldId id="2" r:id="rId1"/></p:sldIdLst></p:presentation>'
+            % P,
+        )
+        z.writestr(
+            "ppt/_rels/presentation.xml.rels",
+            '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+            '<Relationship Id="rId1" Target="slides/slide1.xml"/>'
+            '<Relationship Id="rId2" Target="slides/slide2.xml"/></Relationships>',
+        )
+        z.writestr("ppt/slides/slide1.xml", slide_xml([(100000, 2800, "二番目")]))
+        z.writestr("ppt/slides/slide2.xml", slide_xml([(100000, 2800, "一番目")]))
+    assert slide_texts(str(path)) == ["一番目", "二番目"]
