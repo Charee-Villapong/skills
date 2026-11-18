@@ -157,18 +157,25 @@ class SlopChecker:
         count, found = _count_words(text, TRANSLATION_VERBS)
         add("翻訳調動詞", count, self.translation_verb_limit, found)
 
-        stacked = []
+        # 副詞の上限は「1段落あたり」の個数なので、count も段落単位に揃える
+        # （最も多い段落の個数）。全段落の合計を count にすると、上限（段落
+        # あたり）と単位が食い違い「4件（上限 1）」のような矛盾した表示になる。
+        worst: list[str] = []
+        offending_paragraphs = 0
         for para in _paragraphs(text):
             hits = [w for w in ADVERBS if w in para for _ in range(para.count(w))]
             if len(hits) > self.adverbs_per_paragraph:
-                stacked.extend(hits)
-        if stacked:
+                offending_paragraphs += 1
+                if len(hits) > len(worst):
+                    worst = hits
+        if worst:
             findings.append(
                 {
                     "item": "副詞の重なり（段落内）",
-                    "count": len(stacked),
+                    "count": len(worst),
                     "limit": self.adverbs_per_paragraph,
-                    "examples": stacked[:5],
+                    "paragraphs": offending_paragraphs,
+                    "examples": worst[:5],
                 }
             )
 

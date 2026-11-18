@@ -115,6 +115,22 @@ class TestVocabulary:
         r = sc.check("めっちゃ速かった。\n\nガチで驚いた。")
         assert "副詞の重なり（段落内）" not in items(r)
 
+    def test_adverbs_count_is_per_paragraph_not_total(self):
+        # count は上限（1段落あたり）と単位を揃え、最悪の段落の個数にする。
+        # 2段落がそれぞれ2個ずつでも、合計の4にはならない。
+        r = sc.check("めっちゃ速くてガチで驚いた。\n\nかなり大きくて非常に重い。")
+        finding = items(r)["副詞の重なり（段落内）"]
+        assert finding["count"] == 2
+        assert finding["limit"] == 1
+        assert finding["paragraphs"] == 2
+        assert r["passed"] is False
+
+    def test_adverbs_count_is_worst_paragraph(self):
+        r = sc.check("めっちゃ速くてガチで驚いて、かなり笑った。")
+        finding = items(r)["副詞の重なり（段落内）"]
+        assert finding["count"] == 3
+        assert finding["paragraphs"] == 1
+
     def test_sugiru_three_times_fails(self):
         r = sc.check("美味しすぎる。楽しすぎる。嬉しすぎる。")
         assert items(r)["○○すぎる"]["count"] == 3
