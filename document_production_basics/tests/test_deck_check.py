@@ -66,3 +66,28 @@ def test_slide_order_follows_presentation(tmp_path):
         z.writestr("ppt/slides/slide1.xml", slide_xml([(100000, 2800, "二番目")]))
         z.writestr("ppt/slides/slide2.xml", slide_xml([(100000, 2800, "一番目")]))
     assert slide_texts(str(path)) == ["一番目", "二番目"]
+
+
+def test_slide_order_with_target_before_id(tmp_path):
+    """rels の属性が Target → Id の順で書かれていてもスライドを認識できること。"""
+    import zipfile
+
+    from deck_check import slide_texts
+
+    path = tmp_path / "deck.pptx"
+    with zipfile.ZipFile(path, "w") as z:
+        z.writestr(
+            "ppt/presentation.xml",
+            '<p:presentation xmlns:p="%s" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+            '<p:sldIdLst><p:sldId id="1" r:id="rId2"/><p:sldId id="2" r:id="rId1"/></p:sldIdLst></p:presentation>'
+            % P,
+        )
+        z.writestr(
+            "ppt/_rels/presentation.xml.rels",
+            '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+            '<Relationship Target="slides/slide1.xml" Id="rId1"/>'
+            '<Relationship Target="slides/slide2.xml" Id="rId2"/></Relationships>',
+        )
+        z.writestr("ppt/slides/slide1.xml", slide_xml([(100000, 2800, "二番目")]))
+        z.writestr("ppt/slides/slide2.xml", slide_xml([(100000, 2800, "一番目")]))
+    assert slide_texts(str(path)) == ["一番目", "二番目"]

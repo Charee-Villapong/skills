@@ -19,6 +19,7 @@ NS = {
     "p": "http://schemas.openxmlformats.org/presentationml/2006/main",
     "a": "http://schemas.openxmlformats.org/drawingml/2006/main",
 }
+RELS_NS = "http://schemas.openxmlformats.org/package/2006/relationships"
 TOP_AREA_EMU = 3_200_000  # スライド上部（タイトル帯）とみなす y の上限
 TITLE_MIN_SZ = 2000  # タイトルとみなす最小フォントサイズ（1/100 pt）
 
@@ -66,8 +67,14 @@ def slide_xmls(pptx_path):
     番号順は、スライドの挿入・移動で発表順とずれることがあるので使わない。
     """
     with zipfile.ZipFile(pptx_path) as z:
-        rels = z.read("ppt/_rels/presentation.xml.rels").decode("utf-8")
-        id2target = dict(re.findall(r'Id="([^"]+)"[^>]*Target="([^"]+)"', rels))
+        # 属性の順序（Id と Target の前後）に依存しないよう XML として読む。
+        # 正規表現で Id → Target の語順を決め打ちすると、Target が先に
+        # 書かれた .rels を認識できない。
+        rels_root = ET.fromstring(z.read("ppt/_rels/presentation.xml.rels"))
+        id2target = {
+            rel.get("Id"): rel.get("Target")
+            for rel in rels_root.iter("{%s}Relationship" % RELS_NS)
+        }
         pres = z.read("ppt/presentation.xml").decode("utf-8")
         order = re.findall(r'<p:sldId[^>]*r:id="([^"]+)"', pres)
         names = []
