@@ -1180,9 +1180,16 @@ def detect_structural_ai_habits(raw_text: str) -> tuple[list[Finding], dict]:
     total_chars = len(raw_text) or 1
 
     # 1) 太字密度
-    label_starts = {m.end() - len(m.group(0).lstrip()) for m in BOLD_LABEL_RE.finditer(raw_text)}
-    bold_hits = [m for m in BOLD_SPAN_RE.finditer(raw_text)
-                 if not any(st <= m.start() <= st + 4 for st in label_starts)]
+    # ラベルの太字は数えない。ラベル一致の中にある太字スパン自体の開始位置で
+    # 照合するため、リスト記号や番号の桁数（「1. 」と「100. 」）に依存しない
+    # （旧実装は「行頭から4文字以内」という仮定で、3桁番号リストのラベルを
+    # 誤って強調として数えていた）。
+    label_bold_starts = {
+        m.start() + m.group(0).index("**") for m in BOLD_LABEL_RE.finditer(raw_text)
+    }
+    bold_hits = [
+        m for m in BOLD_SPAN_RE.finditer(raw_text) if m.start() not in label_bold_starts
+    ]
     bold_per_1000 = len(bold_hits) / total_chars * 1000
     if bold_per_1000 >= BOLD_DENSITY_PER_1000_THRESHOLD and len(bold_hits) >= 3:
         first_line = raw_text[: bold_hits[0].start()].count("\n") + 1
