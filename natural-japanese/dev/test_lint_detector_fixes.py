@@ -16,7 +16,10 @@ from unittest import mock
 SCRIPTS_DIR = Path(__file__).resolve().parents[1] / "skills/natural-japanese/scripts"
 sys.path.insert(0, str(SCRIPTS_DIR))
 
-from lint_detectors import detect_low_specificity, detect_structural_ai_habits  # noqa: E402
+from lint_detectors import (  # noqa: E402
+    detect_low_specificity,
+    detect_structural_ai_habits,
+)
 from textcore import mask_markdown_structure  # noqa: E402
 
 
