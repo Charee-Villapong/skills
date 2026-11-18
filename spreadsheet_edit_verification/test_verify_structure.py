@@ -333,6 +333,53 @@ class TestChartMismatches:
 
 
 # ---------------------------------------------------------------------------
+# 異常系: キーの重複（黙って上書きされると照合がすり抜ける）
+# ---------------------------------------------------------------------------
+
+
+class TestDuplicateKeys:
+    def test_duplicate_summary_name_in_after_is_reported(self):
+        after = base_snapshot()
+        after["summaries"].append(
+            {"name": "合計", "cell": "B30", "formula": "=SUM(B2:B9)"}
+        )
+        result = verify_structure.verify(base_snapshot(), after)
+        assert result["ok"] is False
+        found = mismatches_of(result, "duplicate_key")
+        assert len(found) == 1
+        assert found[0]["key"] == "合計"
+
+    def test_duplicate_summary_name_in_before_is_reported(self):
+        before = base_snapshot()
+        before["summaries"].append(
+            {"name": "平均", "cell": "B21", "formula": "=AVERAGE(B2:B9)"}
+        )
+        result = verify_structure.verify(before, base_snapshot())
+        assert result["ok"] is False
+        found = mismatches_of(result, "duplicate_key")
+        assert len(found) == 1
+        assert found[0]["key"] == "平均"
+
+    def test_duplicate_range_is_reported(self):
+        after = base_snapshot()
+        after["formula_ranges"].append({"range": "B2:B9", "formula": "=A2*C9"})
+        result = verify_structure.verify(base_snapshot(), after)
+        assert result["ok"] is False
+        found = mismatches_of(result, "duplicate_key")
+        assert len(found) == 1
+        assert found[0]["key"] == "B2:B9"
+
+    def test_duplicate_chart_name_is_reported(self):
+        after = base_snapshot()
+        after["charts"].append({"name": "売上グラフ", "source_columns": ["A", "C"]})
+        result = verify_structure.verify(base_snapshot(), after)
+        assert result["ok"] is False
+        found = mismatches_of(result, "duplicate_key")
+        assert len(found) == 1
+        assert found[0]["key"] == "売上グラフ"
+
+
+# ---------------------------------------------------------------------------
 # 複数の不一致・ok と mismatches の対応・mismatch の形
 # ---------------------------------------------------------------------------
 

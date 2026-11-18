@@ -37,6 +37,23 @@ def _index(items, key):
     return {item[key]: item for item in items or []}
 
 
+def _duplicate_keys(items, key):
+    """key の値が重複しているものを、重複なく入力順で返す。
+
+    _index の辞書内包表記は重複を黙って上書きしてしまうため、照合前に
+    重複そのものを検出できるようにする（同名の集計が2つある記録は、
+    どちらが正か判断できないまま照合が進んでしまう）。
+    """
+    seen = set()
+    duplicates = []
+    for item in items or []:
+        value = item[key]
+        if value in seen and value not in duplicates:
+            duplicates.append(value)
+        seen.add(value)
+    return duplicates
+
+
 def verify(before, after, restored=None):
     """Compare the after snapshot with the before record.
 
@@ -48,6 +65,26 @@ def verify(before, after, restored=None):
 
     def add(kind, key, detail):
         mismatches.append({"kind": kind, "key": key, "detail": detail})
+
+    for side, snapshot in (("before", before), ("after", after)):
+        for dup in _duplicate_keys(snapshot.get("summaries"), "name"):
+            add(
+                "duplicate_key",
+                dup,
+                f"summary name {dup} is duplicated in the {side} snapshot",
+            )
+        for dup in _duplicate_keys(snapshot.get("formula_ranges"), "range"):
+            add(
+                "duplicate_key",
+                dup,
+                f"formula range {dup} is duplicated in the {side} snapshot",
+            )
+        for dup in _duplicate_keys(snapshot.get("charts"), "name"):
+            add(
+                "duplicate_key",
+                dup,
+                f"chart name {dup} is duplicated in the {side} snapshot",
+            )
 
     before_summaries = _index(before.get("summaries"), "name")
     after_summaries = _index(after.get("summaries"), "name")
