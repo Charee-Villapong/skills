@@ -66,7 +66,9 @@ def needed_width_px(header, values):
     for segment in (header or "").split("\n"):
         widest = max(widest, text_width_px(segment, bold=True))
     for value in values:
-        for segment in str(value).split("\n"):
+        # 空セル（None）は文字として数えない。str(None) の "None"（4文字）
+        # として幅を計算すると、空列でも幅が必要という誤判定になる。
+        for segment in ("" if value is None else str(value)).split("\n"):
             widest = max(widest, text_width_px(segment))
     return math.ceil(widest + PADDING_PX)
 

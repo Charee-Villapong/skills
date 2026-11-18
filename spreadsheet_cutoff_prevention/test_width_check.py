@@ -106,6 +106,15 @@ class TestNeededWidth:
         # 最長セグメント 3文字 × 11.5 + 20 = 54.5 → 切り上げて 55
         assert needed_width_px("", ["あ\nあああ"]) == 55
 
+    def test_none_value_counts_as_empty(self):
+        # 空セル（None）は "None"（半角4文字）として数えない。
+        # ヘッダー「日付」（太字2文字 × 12.0）+ 余白 20 = 44
+        assert needed_width_px("日付", [None]) == 44
+        assert needed_width_px("", [None]) == PADDING_PX
+
+    def test_none_mixed_with_values_uses_longest_real_value(self):
+        assert needed_width_px("日付", [None, "2026/10/30"]) == 83
+
 
 class TestWidthViolations:
     def check(self, columns):
