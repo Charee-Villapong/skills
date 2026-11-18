@@ -99,7 +99,13 @@ def main() -> int:
             print(err, file=sys.stderr)
             return 1
         path = a.files[0].resolve()
-        r = subprocess.run(["git", "show", f"HEAD:./{path.name}"], cwd=path.parent, capture_output=True, text=True)
+        r = subprocess.run(
+            ["git", "show", f"HEAD:./{path.name}"],
+            cwd=path.parent,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+        )
         if r.returncode != 0:
             print(f"エラー: git の直前のコミットに {a.files[0]} が見つかりません(git で管理していないか、まだコミットしていない)", file=sys.stderr)
             return 1

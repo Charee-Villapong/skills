@@ -1,13 +1,18 @@
-"""lint_detectors の誤検出修正の回帰テスト（2026-11 の Gemini レビュー指摘対応）。
+"""lint 系スクリプトの誤検出・不具合修正の回帰テスト（2026-11 の Gemini レビュー指摘対応）。
 
     uv run --with sudachipy --with sudachidict-core python dev/test_lint_detector_fixes.py
 """
 
+import os
+import shutil
+import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "skills/natural-japanese/scripts"))
+SCRIPTS_DIR = Path(__file__).resolve().parents[1] / "skills/natural-japanese/scripts"
+sys.path.insert(0, str(SCRIPTS_DIR))
 
 from lint_detectors import detect_low_specificity, detect_structural_ai_habits  # noqa: E402
 from textcore import mask_markdown_structure  # noqa: E402
@@ -74,6 +79,56 @@ class LowSpecificityImageTests(unittest.TestCase):
         fired, categories = fired_count(ABSTRACT_PARAGRAPH + images)
         self.assertEqual(fired, 1)
         self.assertIn("low_specificity", categories)
+
+
+@unittest.skipUnless(shutil.which("git"), "git が必要")
+class NewFactsGitEncodingTests(unittest.TestCase):
+    def test_git_mode_works_under_non_utf8_locale(self):
+        # newfacts.py --git は git show の出力を encoding="utf-8" で読む。
+        # ロケール任せだと、UTF-8 でない環境で日本語の原文がデコードできず
+        # UnicodeDecodeError で落ちる（修正前の実挙動）。
+        with tempfile.TemporaryDirectory() as directory:
+            repo = Path(directory)
+
+            def git(*args):
+                subprocess.run(
+                    ["git", *args], cwd=repo, check=True, capture_output=True
+                )
+
+            git("init", "-q", ".")
+            git("config", "user.email", "test@example.com")
+            git("config", "user.name", "test")
+            draft = repo / "draft.md"
+            draft.write_text(
+                "これは元の文書です。会議の内容をまとめました。\n", encoding="utf-8"
+            )
+            git("add", ".")
+            git("commit", "-qm", "init")
+            draft.write_text(
+                "これは元の文書です。会議の内容をまとめました。"
+                "NewFrameworkを導入しました。\n",
+                encoding="utf-8",
+            )
+            env = dict(os.environ)
+            env.update(
+                {
+                    "LC_ALL": "C",
+                    "LANG": "C",
+                    "PYTHONCOERCECLOCALE": "0",
+                    "PYTHONUTF8": "0",
+                    "PYTHONIOENCODING": "utf-8",
+                }
+            )
+            proc = subprocess.run(
+                [sys.executable, str(SCRIPTS_DIR / "newfacts.py"), "--git", "draft.md"],
+                cwd=repo,
+                env=env,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+            )
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            self.assertIn("newframework", proc.stdout)
 
 
 if __name__ == "__main__":
