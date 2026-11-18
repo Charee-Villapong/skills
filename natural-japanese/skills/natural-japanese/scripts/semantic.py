@@ -49,6 +49,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -146,10 +147,19 @@ def doc_sentences_with_lines(raw_text: str) -> list[tuple[int, str]]:
 _model_cache = {}
 
 
-def load_model(model_name: str):
-    """初回ロード時だけ ~1GB ダウンロードの可能性を stderr に警告する。"""
+def load_model(model_name: str, trust_remote_code: bool | None = None):
+    """初回ロード時だけ ~1GB ダウンロードの可能性を stderr に警告する。
+
+    trust_remote_code（モデルリポジトリ内のカスタムコード実行）は既定では
+    無効。必要な場合だけ、引数か環境変数 SEMANTIC_TRUST_REMOTE_CODE=1 で
+    明示的に有効化する（引数が優先）。既定モデル（cl-nagoya/ruri-v3-310m）は
+    カスタムコードを必要としないため、無効でも動作は変わらない。
+    """
     if model_name in _model_cache:
         return _model_cache[model_name]
+
+    if trust_remote_code is None:
+        trust_remote_code = os.environ.get("SEMANTIC_TRUST_REMOTE_CODE") == "1"
 
     print(
         f"[semantic.py] モデル読み込み中: {model_name} "
@@ -161,7 +171,7 @@ def load_model(model_name: str):
     from sentence_transformers import SentenceTransformer
 
     device = "mps" if torch.backends.mps.is_available() else ("cuda" if torch.cuda.is_available() else "cpu")
-    model = SentenceTransformer(model_name, device=device, trust_remote_code=True)
+    model = SentenceTransformer(model_name, device=device, trust_remote_code=trust_remote_code)
     _model_cache[model_name] = model
     return model
 
@@ -196,7 +206,10 @@ def compute_metrics(embeddings) -> dict:
 
 
 def run_semantic(
-    raw_text: str, genre: str | None = None, model_name: str = DEFAULT_MODEL
+    raw_text: str,
+    genre: str | None = None,
+    model_name: str = DEFAULT_MODEL,
+    trust_remote_code: bool | None = None,
 ) -> tuple[list[Finding], dict]:
     profile = GENRE_PROFILES.get(genre, {})
     flatness_threshold = profile.get("flatness_threshold", DEFAULT_FLATNESS_THRESHOLD)
@@ -229,7 +242,7 @@ def run_semantic(
     lines_no = [no for no, _ in sentence_items]
     sentences = [s for _, s in sentence_items]
 
-    model = load_model(model_name)
+    model = load_model(model_name, trust_remote_code=trust_remote_code)
     embeddings = model.encode(
         sentences, convert_to_numpy=True, show_progress_bar=False, normalize_embeddings=True
     )
@@ -340,6 +353,15 @@ def main() -> int:
         help="ジャンル別に校正した閾値プロファイルを適用する（essay/tech/business）。未指定時は共通閾値",
     )
     parser.add_argument("--model", default=DEFAULT_MODEL, help=f"埋め込みモデル名（既定: {DEFAULT_MODEL}）")
+    parser.add_argument(
+        "--trust-remote-code",
+        action="store_true",
+        default=None,
+        help=(
+            "モデルリポジトリ内のカスタムコード実行を許可する（既定は不許可）。"
+            "環境変数 SEMANTIC_TRUST_REMOTE_CODE=1 でも有効化できる"
+        ),
+    )
     args = parser.parse_args()
 
     text, err = read_source_file(args.file)
@@ -348,7 +370,9 @@ def main() -> int:
         return 1
 
     try:
-        findings, stats = run_semantic(text, genre=args.genre, model_name=args.model)
+        findings, stats = run_semantic(
+            text, genre=args.genre, model_name=args.model, trust_remote_code=args.trust_remote_code
+        )
     except Exception as exc:
         print(
             f"エラー: 意味モデルの読み込みまたは推論に失敗しました: {exc}",

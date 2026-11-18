@@ -8,8 +8,10 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import types
 import unittest
 from pathlib import Path
+from unittest import mock
 
 SCRIPTS_DIR = Path(__file__).resolve().parents[1] / "skills/natural-japanese/scripts"
 sys.path.insert(0, str(SCRIPTS_DIR))
@@ -129,6 +131,55 @@ class NewFactsGitEncodingTests(unittest.TestCase):
             )
             self.assertEqual(proc.returncode, 0, proc.stderr)
             self.assertIn("newframework", proc.stdout)
+
+
+class SemanticTrustRemoteCodeTests(unittest.TestCase):
+    """semantic.load_model の trust_remote_code 既定値と有効化経路。
+
+    torch / sentence_transformers は重い依存なので、偽モジュールで
+    差し替えて SentenceTransformer へ渡る引数だけを確かめる。
+    """
+
+    def _load(self, name, env_value, **kwargs):
+        import semantic
+
+        calls = {}
+
+        class FakeSentenceTransformer:
+            def __init__(self, model_name, device=None, trust_remote_code=None):
+                calls["trust_remote_code"] = trust_remote_code
+
+        fake_torch = types.SimpleNamespace(
+            backends=types.SimpleNamespace(
+                mps=types.SimpleNamespace(is_available=lambda: False)
+            ),
+            cuda=types.SimpleNamespace(is_available=lambda: False),
+        )
+        fake_st = types.SimpleNamespace(SentenceTransformer=FakeSentenceTransformer)
+        env = {} if env_value is None else {"SEMANTIC_TRUST_REMOTE_CODE": env_value}
+        with mock.patch.dict(
+            sys.modules, {"torch": fake_torch, "sentence_transformers": fake_st}
+        ), mock.patch.dict(os.environ, env):
+            if env_value is None:
+                os.environ.pop("SEMANTIC_TRUST_REMOTE_CODE", None)
+            semantic.load_model(name, **kwargs)
+        return calls["trust_remote_code"]
+
+    def test_default_is_false(self):
+        self.assertIs(self._load("fake-model-default", None), False)
+
+    def test_env_var_enables(self):
+        self.assertIs(self._load("fake-model-env", "1"), True)
+
+    def test_explicit_argument_enables(self):
+        self.assertIs(
+            self._load("fake-model-arg", None, trust_remote_code=True), True
+        )
+
+    def test_explicit_argument_wins_over_env(self):
+        self.assertIs(
+            self._load("fake-model-override", "1", trust_remote_code=False), False
+        )
 
 
 if __name__ == "__main__":
