@@ -858,6 +858,11 @@ def detect_lexical_diversity(
 _URL_IN_TEXT_RE = re.compile(r"https?://\S+")
 
 
+# Markdown の画像記法。ファイル名（image.png 等）が識別子として数えられ、
+# 具体性スコアを水増ししないよう、識別子カウントの前に取り除く。
+_MD_IMAGE_RE = re.compile(r"!\[[^\]]*\]\([^)]*\)")
+
+
 _IDENTIFIER_RE = re.compile(r"(?<![A-Za-z0-9_])[A-Za-z][A-Za-z0-9_.\-]*[A-Za-z0-9](?![A-Za-z0-9_])")
 
 
@@ -922,6 +927,7 @@ def detect_low_specificity(
         # sudachipy が英字の語を固有名詞と判定した分と二重に数えないよう、多いほうを採る。
         raw_para = "\n".join(_raw_or_masked(raw_lines_by_no, no, t) for no, t in para_lines)
         raw_para = _URL_IN_TEXT_RE.sub(" ", raw_para)
+        raw_para = _MD_IMAGE_RE.sub(" ", raw_para)
         identifier_count = len(_IDENTIFIER_RE.findall(raw_para))
         latin_proper = sum(
             1 for m in content_words
