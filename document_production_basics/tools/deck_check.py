@@ -134,7 +134,7 @@ def main(argv):
         bad = 0
         for r in rows:
             flag = ("  <-- " + ",".join(r["flags"])) if r["flags"] else ""
-            bad += any(f.startswith("NO_TITLE") for f in r["flags"])
+            bad += bool(r["flags"])
             print("%2d | %s | %s%s" % (r["no"], r["kicker"], r["title"], flag))
         return 1 if bad else 0
     print(__doc__)

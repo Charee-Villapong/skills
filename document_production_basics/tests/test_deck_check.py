@@ -68,6 +68,59 @@ def test_slide_order_follows_presentation(tmp_path):
     assert slide_texts(str(path)) == ["一番目", "二番目"]
 
 
+def build_deck(path, titles):
+    """各スライドのタイトル文言だけが違う pptx を作る。"""
+    import zipfile
+
+    sld_ids = "".join(
+        '<p:sldId id="%d" r:id="rId%d"/>' % (i, i) for i in range(1, len(titles) + 1)
+    )
+    rels = "".join(
+        '<Relationship Id="rId%d" Target="slides/slide%d.xml"/>' % (i, i)
+        for i in range(1, len(titles) + 1)
+    )
+    with zipfile.ZipFile(path, "w") as z:
+        z.writestr(
+            "ppt/presentation.xml",
+            '<p:presentation xmlns:p="%s" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+            "<p:sldIdLst>%s</p:sldIdLst></p:presentation>" % (P, sld_ids),
+        )
+        z.writestr(
+            "ppt/_rels/presentation.xml.rels",
+            '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+            "%s</Relationships>" % rels,
+        )
+        for i, title in enumerate(titles, 1):
+            z.writestr(
+                "ppt/slides/slide%d.xml" % i, slide_xml([(100000, 2800, title)])
+            )
+
+
+def test_main_exit_code_with_dup_title_only(tmp_path):
+    """重複タイトルだけでも、docstring の仕様どおり終了コード1になること。"""
+    from deck_check import main
+
+    path = tmp_path / "deck.pptx"
+    build_deck(path, ["同じタイトル", "同じタイトル"])
+    assert main(["deck_check.py", str(path)]) == 1
+
+
+def test_main_exit_code_with_no_title(tmp_path):
+    from deck_check import main
+
+    path = tmp_path / "deck.pptx"
+    build_deck(path, ["タイトルあり", ""])
+    assert main(["deck_check.py", str(path)]) == 1
+
+
+def test_main_exit_code_clean_deck(tmp_path):
+    from deck_check import main
+
+    path = tmp_path / "deck.pptx"
+    build_deck(path, ["タイトル1", "タイトル2"])
+    assert main(["deck_check.py", str(path)]) == 0
+
+
 def test_slide_order_with_target_before_id(tmp_path):
     """rels の属性が Target → Id の順で書かれていてもスライドを認識できること。"""
     import zipfile
